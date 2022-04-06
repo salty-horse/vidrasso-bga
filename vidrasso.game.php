@@ -109,11 +109,11 @@ class Vidrasso extends Table {
         foreach ($players as $player_id => $player) {
             $this->cards->pickCards(8, 'deck', $player_id);
             $this->cards->pickCards(8, 'deck', $player_id);
-            $this->deck->pickCardsForLocation(2, 'deck', 'straw1', $player_id);
-            $this->deck->pickCardsForLocation(2, 'deck', 'straw2', $player_id);
-            $this->deck->pickCardsForLocation(2, 'deck', 'straw3', $player_id);
-            $this->deck->pickCardsForLocation(2, 'deck', 'straw4', $player_id);
-            $this->deck->pickCardsForLocation(2, 'deck', 'straw5', $player_id);
+            $this->deck->pickCardsForLocation(2, 'deck', 'straw_'.$player_id.'_1');
+            $this->deck->pickCardsForLocation(2, 'deck', 'straw_'.$player_id.'_2');
+            $this->deck->pickCardsForLocation(2, 'deck', 'straw_'.$player_id.'_3');
+            $this->deck->pickCardsForLocation(2, 'deck', 'straw_'.$player_id.'_4');
+            $this->deck->pickCardsForLocation(2, 'deck', 'straw_'.$player_id.'_5');
         }
 
         // Activate first player (which is in general a good idea :))
@@ -160,10 +160,10 @@ class Vidrasso extends Table {
             $visible_strawmen = [];
             $hidden_strawmen = [];
             for ($i = 1; $i <= 5; $i++) {
-                $cards = $this->deck->getCardsInLocation('straw'.$1, $player_id);
-                if (count($cards) >= 1) {
-                    array_push($visible_strawmen, $cards[0]);
-                    array_push($hidden_strawmen, count($cards) == 2);
+                $straw_cards = array_values($this->deck->getCardsInLocation('straw_'.$player_id.'_'$i));
+                if (count($straw_cards) >= 1) {
+                    array_push($visible_strawmen, $straw_cards[0]);
+                    array_push($hidden_strawmen, count($straw_cards) == 2);
                 } else {
                     array_push($visible_strawmen, null);
                     array_push($hidden_strawmen, false);
@@ -261,7 +261,7 @@ class Vidrasso extends Table {
         // Collect all cards in hand and visible strawmen
         $available_cards = getPlayerHand($player_id);
         for ($i = 1; $i <= 5; $i++) {
-            $straw_cards = $this->deck->getCardsInLocation('straw'.$i, $player_id);
+            $straw_cards = array_values($this->deck->getCardsInLocation('straw_'.$player_id.'_'.$i));
             if (count($straw_cards) >= 1) {
                 $available_cards[$straw_cards[0]['id']] = $straw_cards[0];
             }
