@@ -32,13 +32,14 @@ class Vidrasso extends Table {
 
         parent::__construct();
         self::initGameStateLabels([
-            'trumpRank' => 10,
-            'trumpSuit' => 11,
-            'ledSuit' => 12,
-            'firstPlayer' => 13,
-            'firstPicker' => 14,
-            'player1UsedStrawman' => 15,
-            'player2UsedStrawman' => 16,
+            'roundNumber' => 10,
+            'trumpRank' => 11,
+            'trumpSuit' => 12,
+            'ledSuit' => 13,
+            'firstPlayer' => 14,
+            'firstPicker' => 15,
+            'player1UsedStrawman' => 16,
+            'player2UsedStrawman' => 17,
             'targetPoints' => 100,
         ]);
 
@@ -143,7 +144,7 @@ class Vidrasso extends Table {
 
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score FROM player ";
+        $sql = 'SELECT player_id id, player_score score FROM player ';
         $result['players'] = self::getCollectionFromDb($sql);
 
         // Cards in player hand
@@ -152,6 +153,9 @@ class Vidrasso extends Table {
         // Cards played on the table
         $result['cardsontable'] = $this->cards->getCardsInLocation('cardsontable');
 
+        $result['roundNumber'] = $this->getGameStateValue('roundNumber');
+        $result['firstPlayer'] = $this->getGameStateValue('firstPlayer');
+        $result['firstPicker'] = $this->getGameStateValue('firstPicker');
         $result['trumpRank'] = $this->getGameStateValue('trumpRank');
         $result['trumpSuit'] = $this->getGameStateValue('trumpSuit');
 
@@ -491,8 +495,8 @@ class Vidrasso extends Table {
                 'points' => $points,
             ]);
         }
+
         $new_scores = self::getCollectionFromDb('SELECT player_id, player_score FROM player', true);
-        self::notifyAllPlayers('newScores', '', ['newScores' => $new_scores]);
 
         // Check if this is the end of the game
         $target_points = $this->getGameStateValue('targetPoints');
@@ -523,6 +527,11 @@ class Vidrasso extends Table {
             }
             self::setGameStateValue('firstPicker', $player_with_lowest_score);
         }
+
+        // TODO: Include new first player, new leader, round number
+        self::notifyAllPlayers('newScores', '', ['newScores' => $new_scores]);
+
+        // TODO: Increment round number
 
         $this->gamestate->nextState('nextHand');
     }
