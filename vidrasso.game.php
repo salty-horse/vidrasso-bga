@@ -71,8 +71,7 @@ class Vidrasso extends Table {
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
         $sql = 'INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar) VALUES ';
         $values = [];
-        foreach($players as $player_id => $player)
-        {
+        foreach ($players as $player_id => $player) {
             $color = array_shift($default_colors);
             $values[] = "('".$player_id."','$color','".$player['player_canal']."','".addslashes($player['player_name'])."','".addslashes($player['player_avatar'])."')";
         }
@@ -103,20 +102,6 @@ class Vidrasso extends Table {
 
         $this->cards->createCards($cards, 'deck');
 
-        // Shuffle deck
-        $this->cards->shuffle('deck');
-        // Deal 13 cards to each players
-        $players = self::loadPlayersBasicInfos();
-        foreach ($players as $player_id => $player) {
-            $this->cards->pickCards(8, 'deck', $player_id);
-            $this->cards->pickCards(8, 'deck', $player_id);
-            $this->deck->pickCardsForLocation(2, 'deck', 'straw_'.$player_id.'_1');
-            $this->deck->pickCardsForLocation(2, 'deck', 'straw_'.$player_id.'_2');
-            $this->deck->pickCardsForLocation(2, 'deck', 'straw_'.$player_id.'_3');
-            $this->deck->pickCardsForLocation(2, 'deck', 'straw_'.$player_id.'_4');
-            $this->deck->pickCardsForLocation(2, 'deck', 'straw_'.$player_id.'_5');
-        }
-
         // Activate first player (which is in general a good idea :))
         $this->activeNextPlayer();
 
@@ -144,7 +129,7 @@ class Vidrasso extends Table {
 
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = 'SELECT player_id id, player_score score FROM player ';
+        $sql = 'SELECT player_id id, player_score score FROM player';
         $result['players'] = self::getCollectionFromDb($sql);
 
         // Cards in player hand
@@ -159,22 +144,15 @@ class Vidrasso extends Table {
         $result['trumpRank'] = $this->getGameStateValue('trumpRank');
         $result['trumpSuit'] = $this->getGameStateValue('trumpSuit');
 
+        $score_piles = getScorePiles();
+
         foreach ($result['players'] as &$player) {
             $player_id = $player['id'];
-            $visible_strawmen = [];
-            $hidden_strawmen = [];
-            for ($i = 1; $i <= 5; $i++) {
-                $straw_cards = array_values($this->deck->getCardsInLocation('straw_'.$player_id.'_'$i));
-                if (count($straw_cards) >= 1) {
-                    array_push($visible_strawmen, $straw_cards[0]);
-                    array_push($hidden_strawmen, count($straw_cards) == 2);
-                } else {
-                    array_push($visible_strawmen, null);
-                    array_push($hidden_strawmen, false);
-                }
-            }
-            $player['visible_strawmen'] = $visible_strawmen;
-            $player['hidden_strawmen'] = $hidden_strawmen;
+            $strawmen = getPlayerStrawmen($player_id);
+            $player['visible_strawmen'] = $strawmen['visible'];
+            $player['more_strawmen'] = $strawmen['more'];
+            $player['tricks_won'] = $score_piles[$player_id]['tricks_won'];
+            $player['score_pile'] = $score_piles[$player_id]['points'];
         }
 
         return $result;
@@ -195,6 +173,53 @@ class Vidrasso extends Table {
         // TODO: compute and return the game progression
 
         return 0;
+    }
+
+    //////////////////////////////////////////////////////////////////////////////
+    //////////// Utilities
+    ////////////
+    // TODO: Use single sql query
+    function getPlayerStrawmen($player_id) {
+        $visible_strawmen = [];
+        $hidden_strawmen = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $straw_cards = array_values($this->deck->getCardsInLocation('straw_'.$player_id.'_'$i));
+            if (count($straw_cards) >= 1) {
+                array_push($visible_strawmen, $straw_cards[0]);
+                array_push($hidden_strawmen, count($straw_cards) == 2);
+            } else {
+                array_push($visible_strawmen, null);
+                array_push($hidden_strawmen, false);
+            }
+        }
+
+        return [
+            'visible' => $visible_strawmen,
+            'more' => $hidden_strawmen,
+        ]
+    }
+
+    function getScorePiles() {
+        $players = self::loadPlayersBasicInfos();
+        $result = [];
+        $pile_size_by_player = [];
+        foreach ($players as $player_id => $player) {
+            $result[$player_id] = ['points' => 0];
+            $pile_size_by_player[$player_id] = 0;
+        }
+
+        $cards = $this->cards->getCardsInLocation('scorepile');
+        foreach ($cards as $card) {
+            $player_id = $card['location_arg'];
+            $result[$player_id]['points'] += $card['type_arg'];
+            $pile_size_by_player[$player_id] += 1;
+        }
+
+        foreach ($players as $player_id => $player) {
+            $result[$player_id]['tricks_won'] = $pile_size_by_player[$player_id] / 2;
+        }
+
+        return $result;
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -247,7 +272,7 @@ class Vidrasso extends Table {
         if (!in_array($card, array_keys($cards_in_hand))) {
             throw new BgaUserException(self::_('You do not have that card.'));
         }
-        $this->cards->moveCard($card_id, 'scorepile', self::getPlayerAfter($player_id));
+        $this->cards->moveCard($card_id, 'gift', self::getPlayerAfter($player_id));
         self::notifyPlayer($player_id, 'giftCard', '', ['cards' => $card_id]);
         $this->gamestate->setPlayerNonMultiactive($player_id, '');
     }
@@ -264,10 +289,10 @@ class Vidrasso extends Table {
 
         // Collect all cards in hand and visible strawmen
         $available_cards = getPlayerHand($player_id);
-        for ($i = 1; $i <= 5; $i++) {
-            $straw_cards = array_values($this->deck->getCardsInLocation('straw_'.$player_id.'_'.$i));
-            if (count($straw_cards) >= 1) {
-                $available_cards[$straw_cards[0]['id']] = $straw_cards[0];
+        $strawmen = getPlayerStrawmen($player_id);
+        foreach ($strawmen['visible'] as $straw_card) {
+            if ($straw_card) {
+                $available_cards[$straw_cards['id']] = $straw_card;
             }
         }
 
@@ -334,19 +359,42 @@ class Vidrasso extends Table {
      * The action method of state X is called everytime the current game state is set to X.
      */
     function stNewHand() {
-        // Take back all cards (from any location => null) to deck
-        $this->cards->moveAllCardsInLocation(null, "deck");
+        self::incStat(1, "handNbr" );
+
+
+        // Shuffle deck
+        $this->cards->moveAllCardsInLocation(null, 'deck');
         $this->cards->shuffle('deck');
-        // Deal 13 cards to each players
-        // Create deck, shuffle it and give 13 initial cards
+
+        // Deal cards
         $players = self::loadPlayersBasicInfos();
+        $public_strawmen = []
         foreach ($players as $player_id => $player) {
-            $cards = $this->cards->pickCards(13, 'deck', $player_id);
-            // Notify player about his cards
-            self::notifyPlayer($player_id, 'newHand', '', ['cards' => $cards]);
+            $hand_cards = $this->cards->pickCards(8, 'deck', $player_id);
+            $straw1 = $this->deck->pickCardsForLocation(2, 'deck', 'straw_'.$player_id.'_1');
+            $straw2 = $this->deck->pickCardsForLocation(2, 'deck', 'straw_'.$player_id.'_2');
+            $straw3 = $this->deck->pickCardsForLocation(2, 'deck', 'straw_'.$player_id.'_3');
+            $straw4 = $this->deck->pickCardsForLocation(2, 'deck', 'straw_'.$player_id.'_4');
+            $straw5 = $this->deck->pickCardsForLocation(2, 'deck', 'straw_'.$player_id.'_5');
+
+            // TODO: Check that the first card is always first in the response
+            $public_strawmen[$player_id] = [
+                array_values($straw1)[0],
+                array_values($straw2)[0],
+                array_values($straw3)[0],
+                array_values($straw4)[0],
+                array_values($straw5)[0],
+            ]
+
+            self::notifyPlayer($player_id, 'newHand', '', ['hand_cards' => $hand_cards]);
         }
-        self::setGameStateValue('alreadyPlayedHearts', 0);
-        $this->gamestate->nextState("");
+
+        // Notify both players about the public strawmen, first player, and first picker
+        self::notifyAllPlayers('newHandPublic', '', [
+            'strawmen' => $public_strawmen,
+        ]);
+
+        $this->gamestate->nextState('');
     }
 
     function stFirstTrick() {
@@ -361,7 +409,7 @@ class Vidrasso extends Table {
         $this->gamestate->nextState();
     }
 
-    function getCardValue($card, $trump_suit, $led_suit) {
+    function getCardStrength($card, $trump_suit, $led_suit) {
         $value = -$card['type_arg'];
         if ($card['type'] == $trump_suit) {
             $value -= 100;
@@ -402,9 +450,9 @@ class Vidrasso extends Table {
             }
         } else {
             // Lowest value wins
-            $card_0_value = getCardValue($cards_on_table[0], $trump_suit, $led_suit);
-            $card_1_value = getCardValue($cards_on_table[1], $trump_suit, $led_suit);
-            if ($card_0_value < $card2Value) {
+            $card_0_strength = getCardStrength($cards_on_table[0], $trump_suit, $led_suit);
+            $card_1_strength = getCardStrength($cards_on_table[1], $trump_suit, $led_suit);
+            if ($card_0_strength < $card_1_strength) {
                 $winning_player = $cards_on_table[0]['location_arg'];
             } else {
                 $winning_player = $cards_on_table[1]['location_arg'];
@@ -416,11 +464,6 @@ class Vidrasso extends Table {
         // Move all cards to the winner's scorepile
         $this->cards->moveAllCardsInLocation('cardsontable', 'scorepile', null, $winning_player);
 
-        // TODO: Decide if we want to track points during the hand, and if it should be part of the total score, or a separate score
-        // that will only be added to the total at the end of the hand.
-
-        // TODO: Keep count of won tricks?
-
         // Notify
         // Note: we use 2 notifications here in order we can pause the display during the first notification
         //  before we move all cards to the winner (during the second)
@@ -428,7 +471,7 @@ class Vidrasso extends Table {
         self::notifyAllPlayers('trickWin', clienttranslate('${player_name} wins the trick and ${points} points'), [
             'player_id' => $winning_player,
             'player_name' => $players[$winning_player]['player_name'],
-            'points' => 0, // TODO
+            'points' => $cards_on_table[0]['type_arg'] + $cards_on_table[1]['type_arg'],
         ]);
         self::notifyAllPlayers('giveAllCardsToPlayer','', [
             'player_id' => $winning_player,
@@ -470,29 +513,21 @@ class Vidrasso extends Table {
         // Count and score points, then end the game or go to the next hand.
         $players = self::loadPlayersBasicInfos();
 
-        $player_to_points = [];
-        foreach ($players as $player_id => $player) {
-            $player_to_points[$player_id] = 0;
-        }
-        $cards = $this->cards->getCardsInLocation('scorepile');
-        foreach ($cards as $card) {
-            $player_id = $card['location_arg'];
-            $player_to_points[$player_id] += $card['type_arg'];
-        }
+        $score_piles = getScorePiles();
 
-        // TODO: Explicitly reveal the gift card?
+        $gift_cards_by_player = getCollectionFromDB('select card_location_arg id, card_type_arg type_arg from card where card_location = "gift"');
 
         // Apply scores to player
-        foreach ($player_to_points as $player_id => $points) {
-            if ($points == 0) {
-                continue;
-            }
+        foreach ($score_piles as $player_id => $score_pile) {
+            $gift_value = $gift_cards_by_player[$player_id]['type_arg'];
+            $points = $score_pile['points'] + $gift_value;
             $sql = "UPDATE player SET player_score=player_score+$points  WHERE player_id='$player_id'";
             self::DbQuery($sql);
-            self::notifyAllPlayers('points', clienttranslate('${player_name} scores ${points} points'), [
+            self::notifyAllPlayers('points', clienttranslate('${player_name} scores ${points} points (was gifted ${gift_value})'), [
                 'player_id' => $player_id,
                 'player_name' => $players [$player_id] ['player_name'],
                 'points' => $points,
+                'gift_value' => $gift_value,
             ]);
         }
 
@@ -528,10 +563,7 @@ class Vidrasso extends Table {
             self::setGameStateValue('firstPicker', $player_with_lowest_score);
         }
 
-        // TODO: Include new first player, new leader, round number
         self::notifyAllPlayers('newScores', '', ['newScores' => $new_scores]);
-
-        // TODO: Increment round number
 
         $this->gamestate->nextState('nextHand');
     }
