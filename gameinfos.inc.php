@@ -15,7 +15,7 @@ $gameinfos = [
 'game_name' => 'Vidrasso',
 
 // Game designer (or game designers, separated by commas)
-'designer' => 'Carl Chudyk',
+'designer' => 'Sean Ross',
 
 // Game artist (or game artists, separated by commas)
 'artist' => '',

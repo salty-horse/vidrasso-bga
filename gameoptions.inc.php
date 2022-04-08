@@ -26,10 +26,10 @@
 
 $game_options = [
     100 => [
-        'name' => totranslate('Game mode'),
+        'name' => totranslate('Game length'),
         'values' => [
-            300 => ['name' => totranslate('Standard game'), 'description' => totranslate('Race to 300 points.')],
-            500 => ['name' => totranslate('Long game'), 'description' => totranslate('Race to 500 points.')],
+            300 => ['name' => totranslate('Standard game'), 'description' => totranslate('Play to 300 points.')],
+            500 => ['name' => totranslate('Long game'), 'description' => totranslate('Play to 500 points.')],
         ],
         'default' => 300
     ],

@@ -49,19 +49,9 @@ $stats_type = [
 
     // Statistics global to table
     'table' => [
-        'turns_number' => [
-            'id'=> 10,
-            'name' => totranslate('Number of turns'),
-            'type' => 'int',
-        ],
     ],
 
     // Statistics existing for each player
     'player' => [
-        'turns_number' => [
-            'id'=> 10,
-            'name' => totranslate('Number of turns'),
-            'type' => 'int'
-        ],
     ]
 ];

@@ -38,8 +38,8 @@ class Vidrasso extends Table {
             'ledSuit' => 13,
             'firstPlayer' => 14,
             'firstPicker' => 15,
-            'player1UsedStrawman' => 16,
-            'player2UsedStrawman' => 17,
+            'player1UsedStrawmanPile' => 16,
+            'player2UsedStrawmanPile' => 17,
             'targetPoints' => 100,
         ]);
 
@@ -86,8 +86,8 @@ class Vidrasso extends Table {
 
         self::setGameStateInitialValue('trumpRank', 0);
         self::setGameStateInitialValue('trumpSuit', 0);
-        self::setGameStateInitialValue('player1UsedStrawman', 0);
-        self::setGameStateInitialValue('player2UsedStrawman', 0);
+        self::setGameStateInitialValue('player1UsedStrawmanPile', 0);
+        self::setGameStateInitialValue('player2UsedStrawmanPile', 0);
 
         // Init game statistics
         // (note: statistics are defined in your stats.inc.php file)
@@ -95,7 +95,7 @@ class Vidrasso extends Table {
         // Create cards
         $cards = [];
         foreach ($this->suits as $suit_id => $suit) {
-            for ($value = 1; $value <= 10; $value ++) {
+            for ($value = 1; $value <= 9; $value++) {
                 $cards[] = ['type' => $suit_id, 'type_arg' => $value, 'nbr' => 1];
             }
         }
@@ -168,8 +168,7 @@ class Vidrasso extends Table {
         This method is called each time we are in a game state with the "updateGameProgression" property set to true
         (see states.inc.php)
     */
-    function getGameProgression()
-    {
+    function getGameProgression() {
         // TODO: compute and return the game progression
 
         return 0;
@@ -183,7 +182,7 @@ class Vidrasso extends Table {
         $visible_strawmen = [];
         $hidden_strawmen = [];
         for ($i = 1; $i <= 5; $i++) {
-            $straw_cards = array_values($this->deck->getCardsInLocation('straw_'.$player_id.'_'$i));
+            $straw_cards = array_values($this->deck->getCardsInLocation("straw_{$i}_{$player_id}"));
             if (count($straw_cards) >= 1) {
                 array_push($visible_strawmen, $straw_cards[0]);
                 array_push($hidden_strawmen, count($straw_cards) == 2);
@@ -196,7 +195,7 @@ class Vidrasso extends Table {
         return [
             'visible' => $visible_strawmen,
             'more' => $hidden_strawmen,
-        ]
+        ];
     }
 
     function getScorePiles() {
@@ -320,8 +319,8 @@ class Vidrasso extends Table {
         // Remember if the played card is a strawman
         if (str_starts_with($current_card['location'], 'straw')) {
             self.setGameStateValue(
-                'player'.getPlayerNoById($player_id).'UsedStrawman',
-                $current_card['location'][5]);
+                'player'.getPlayerNoById($player_id).'UsedStrawmanPile',
+                $current_card['location'][6]);
         }
 
         $this->cards->moveCard($card_id, 'cardsontable', $player_id);
@@ -359,8 +358,7 @@ class Vidrasso extends Table {
      * The action method of state X is called everytime the current game state is set to X.
      */
     function stNewHand() {
-        self::incStat(1, "handNbr" );
-
+        self::incStat(1, 'roundNumber');
 
         // Shuffle deck
         $this->cards->moveAllCardsInLocation(null, 'deck');
@@ -368,14 +366,14 @@ class Vidrasso extends Table {
 
         // Deal cards
         $players = self::loadPlayersBasicInfos();
-        $public_strawmen = []
+        $public_strawmen = [];
         foreach ($players as $player_id => $player) {
             $hand_cards = $this->cards->pickCards(8, 'deck', $player_id);
-            $straw1 = $this->deck->pickCardsForLocation(2, 'deck', 'straw_'.$player_id.'_1');
-            $straw2 = $this->deck->pickCardsForLocation(2, 'deck', 'straw_'.$player_id.'_2');
-            $straw3 = $this->deck->pickCardsForLocation(2, 'deck', 'straw_'.$player_id.'_3');
-            $straw4 = $this->deck->pickCardsForLocation(2, 'deck', 'straw_'.$player_id.'_4');
-            $straw5 = $this->deck->pickCardsForLocation(2, 'deck', 'straw_'.$player_id.'_5');
+            $straw1 = $this->deck->pickCardsForLocation(2, 'deck', "straw_1_{$player_id}");
+            $straw2 = $this->deck->pickCardsForLocation(2, 'deck', "straw_2_{$player_id}");
+            $straw3 = $this->deck->pickCardsForLocation(2, 'deck', "straw_3_{$player_id}");
+            $straw4 = $this->deck->pickCardsForLocation(2, 'deck', "straw_4_{$player_id}");
+            $straw5 = $this->deck->pickCardsForLocation(2, 'deck', "straw_5_{$player_id}");
 
             // TODO: Check that the first card is always first in the response
             $public_strawmen[$player_id] = [
@@ -384,7 +382,7 @@ class Vidrasso extends Table {
                 array_values($straw3)[0],
                 array_values($straw4)[0],
                 array_values($straw5)[0],
-            ]
+            ];
 
             self::notifyPlayer($player_id, 'newHand', '', ['hand_cards' => $hand_cards]);
         }
@@ -481,23 +479,36 @@ class Vidrasso extends Table {
     }
 
     function stRevealStrawmen() {
-        // TODO check which piles are revealed and notify players
+        // Check which piles are revealed and notify players
         $player_strawman_use = [
-            1 => self::getGameStateValue('player1UsedStrawman'),
-            2 => self::getGameStateValue('player2UsedStrawman')
+            1 => self::getGameStateValue('player1UsedStrawmanPile'),
+            2 => self::getGameStateValue('player2UsedStrawmanPile')
         ];
 
         if ($player_strawman_use[1] || $player_strawman_use[2]) {
+            $revealed_cards_by_player = [];
             $player_ids_by_no = [];
             $players = self::loadPlayersBasicInfos();
             foreach ($players as $player_id => $player) {
                 $player_ids_by_no[$player['player_no']] = $player_id;
+                $pile = $player_strawman_use[$player['player_no']];
+                if ($pile) {
+                    $remaining_cards_in_pile = $this->deck->getCardsInLocation("straw_{$pile}_{$player_id}", null, 'location_arg');
+                    if ($remaining_cards_in_pile) {
+                        $revealed_cards_by_player[$player_id] = [
+                            'pile' => $pile,
+                            'new_card' => array_keys($remaining_cards_in_pile)[0],
+                        ];
+                    }
+                }
             }
 
-            // TODO Notify players of each use
+            self::notifyAllPlayers('revealStrawman', clienttranslate(''), [
+                'revealed_cards' => $revealed_cards_by_player,
+            ]);
 
-            self::setGameStateValue('player1UsedStrawman', 0);
-            self::setGameStateValue('player2UsedStrawman', 0);
+            self::setGameStateValue('player1UsedStrawmanPile', 0);
+            self::setGameStateValue('player2UsedStrawmanPile', 0);
         }
 
         if ($this->cards->countCardInLocation('hand') == 0) {
