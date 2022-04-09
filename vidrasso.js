@@ -16,7 +16,8 @@
 'use strict';
 
 define([
-    'dojo','dojo/_base/declare',
+    'dojo',
+    'dojo/_base/declare',
     'ebg/core/gamegui',
     'ebg/counter',
     'ebg/stock'
@@ -29,12 +30,12 @@ function (dojo, declare) {
             this.cardwidth = 72;
             this.cardheight = 96;
 
-			this.suitSymbols = {
-				1: {text: '♠', color: 'black'},
-				2: {text: '♥', color: 'red'},
-				3: {text: '♣', color: 'black'},
-				4: {text: '♦', color: 'red'},
-			}
+            this.suitSymbols = {
+                1: {text: '♠', color: 'black'},
+                2: {text: '♥', color: 'red'},
+                3: {text: '♣', color: 'black'},
+                4: {text: '♦', color: 'red'},
+            }
         },
 
         /*
@@ -93,18 +94,25 @@ function (dojo, declare) {
                 this.playCardOnTable(player_id, color, value, card.id);
             }
 
-			if (this.gamedatas.trumpRank != "0") {
-				let elem = document.getElementById('trump_rank');
-				elem.textContent = this.gamedatas.trumpRank;
-			}
+            if (this.gamedatas.trumpRank != "0") {
+                let elem = document.getElementById('trump_rank');
+                elem.textContent = this.gamedatas.trumpRank;
+            }
 
-			if (this.gamedatas.trumpSuit != "0") {
-				let elem = document.getElementById('trump_suit');
-				let suit = this.suitSymbols[this.gamedatas.trumpSuit];
-				elem.textContent = suit.text;
-				elem.style.color = suit.color;
-			}
-		},
+            if (this.gamedatas.trumpSuit != "0") {
+                let elem = document.getElementById('trump_suit');
+                let suit = this.suitSymbols[this.gamedatas.trumpSuit];
+                elem.textContent = suit.text;
+                elem.style.color = suit.color;
+            }
+
+            this.addTooltipToClass("playertablecard", _("Card played on the table"), '');
+
+            // Setup game notifications to handle (see "setupNotifications" method below)
+            this.setupNotifications();
+            
+            this.ensureSpecificImageLoading(['../common/point.png']);
+        },
 
         ///////////////////////////////////////////////////
         //// Game & client states
@@ -118,9 +126,9 @@ function (dojo, declare) {
 
             switch (stateName) {
             case 'selectTrump':
-				if(this.isCurrentPlayerActive()) {
-					dojo.style('#trumpSelector', 'display', 'block');
-				}
+                if(this.isCurrentPlayerActive()) {
+                    document.getElementById('trumpSelector').style.display = 'block';
+                }
                 break;
 
             case 'dummmy':
@@ -137,7 +145,7 @@ function (dojo, declare) {
 
             switch (stateName) {
             case 'selectTrump':
-				dojo.style('#trumpSelector', 'display', 'none');
+                document.getElementById('trumpSelector').style.display = 'none';
                 break;
 
             case 'dummmy':
@@ -202,11 +210,11 @@ function (dojo, declare) {
 
         // Get card unique identifier based on its color and value
         getCardUniqueId : function(suit, rank) {
-			if (rank == 1) {
-				rank = 12;
-			} else {
-				rank -= 2;
-			}
+            if (rank == 1) {
+                rank = 12;
+            } else {
+                rank -= 2;
+            }
             return (suit - 1) * 13 + rank;
         },
 
@@ -273,15 +281,15 @@ function (dojo, declare) {
 
         onChoosingTrump : function(event) {
             if (!this.checkAction('selectTrump'))
-				return;
+                return;
 
-			let data = event.target.dataset;
-			this.ajaxAction('selectTrump', {
-				trump_type: data.type,
-				id: data.id,
-				lock : true
-			});
-		},
+            let data = event.target.dataset;
+            this.ajaxAction('selectTrump', {
+                trump_type: data.type,
+                id: data.id,
+                lock : true
+            });
+        },
 
         /*
          * Example:
@@ -337,19 +345,19 @@ function (dojo, declare) {
         },
 
         notif_selectTrumpRank: (notif) => {
-			let elem = document.getElementById('trump_rank');
-			elem.textContent = notif.args.rank;
+            let elem = document.getElementById('trump_rank');
+            elem.textContent = notif.args.rank;
         },
 
         notif_selectTrumpSuit: (notif) => {
-			let elem = document.getElementById('trump_suit');
-			let suit = this.suitSymbols[notif.args.suit];
-			elem.textContent = suit.text;
-			elem.style.color = suit.color;
+            let elem = document.getElementById('trump_suit');
+            let suit = this.suitSymbols[notif.args.suit];
+            elem.textContent = suit.text;
+            elem.style.color = suit.color;
         },
 
         notif_giftCard: (notif) => {
-			this.playerHand.removeFromStockById(notif.args.card);
+            this.playerHand.removeFromStockById(notif.args.card);
         },
 
         notif_playCard: (notif) => {
