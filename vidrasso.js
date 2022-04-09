@@ -179,9 +179,28 @@ function (dojo, declare) {
             script.
 
         */
+
+        ajaxAction: function (action, args, func, err, lock) {
+            if (!args) {
+                args = [];
+            }
+            delete args.action;
+            if (!args.hasOwnProperty('lock') || args.lock) {
+                args.lock = true;
+            } else {
+                delete args.lock;
+            }
+            if (typeof func == 'undefined' || func == null) {
+                func = result => {};
+            }
+
+            let name = this.game_name;
+            this.ajaxcall(`/vidrasso/vidrasso/${action}.html`, args, this, func, err);
+        },
+
         // Get card unique identifier based on its color and value
-        getCardUniqueId : function(color, value) {
-            return (color - 1) * 13 + (value - 2);
+        getCardUniqueId : function(suit, rank) {
+            return (suit - 1) * 13 + (rank - 2);
         },
 
 

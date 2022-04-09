@@ -43,8 +43,8 @@ class Vidrasso extends Table {
             'targetPoints' => 100,
         ]);
 
-        $this->cards = self::getNew('module.common.deck');
-        $this->cards->init('card');
+        $this->deck = self::getNew('module.common.deck');
+        $this->deck->init('card');
     }
 
     protected function getGameName()
@@ -100,7 +100,7 @@ class Vidrasso extends Table {
             }
         }
 
-        $this->cards->createCards($cards, 'deck');
+        $this->deck->createCards($cards, 'deck');
 
         // Activate first player (which is in general a good idea :))
         $this->activeNextPlayer();
@@ -133,10 +133,10 @@ class Vidrasso extends Table {
         $result['players'] = self::getCollectionFromDb($sql);
 
         // Cards in player hand
-        $result['hand'] = $this->cards->getCardsInLocation('hand', $current_player_id);
+        $result['hand'] = $this->deck->getCardsInLocation('hand', $current_player_id);
 
         // Cards played on the table
-        $result['cardsontable'] = $this->cards->getCardsInLocation('cardsontable');
+        $result['cardsontable'] = $this->deck->getCardsInLocation('cardsontable');
 
         $result['roundNumber'] = $this->getGameStateValue('roundNumber');
         $result['firstPlayer'] = $this->getGameStateValue('firstPlayer');
@@ -144,11 +144,11 @@ class Vidrasso extends Table {
         $result['trumpRank'] = $this->getGameStateValue('trumpRank');
         $result['trumpSuit'] = $this->getGameStateValue('trumpSuit');
 
-        $score_piles = getScorePiles();
+        $score_piles = $this->getScorePiles();
 
         foreach ($result['players'] as &$player) {
             $player_id = $player['id'];
-            $strawmen = getPlayerStrawmen($player_id);
+            $strawmen = $this->getPlayerStrawmen($player_id);
             $player['visible_strawmen'] = $strawmen['visible'];
             $player['more_strawmen'] = $strawmen['more'];
             $player['tricks_won'] = $score_piles[$player_id]['tricks_won'];
@@ -207,7 +207,7 @@ class Vidrasso extends Table {
             $pile_size_by_player[$player_id] = 0;
         }
 
-        $cards = $this->cards->getCardsInLocation('scorepile');
+        $cards = $this->deck->getCardsInLocation('scorepile');
         foreach ($cards as $card) {
             $player_id = $card['location_arg'];
             $result[$player_id]['points'] += $card['type_arg'];
@@ -271,7 +271,7 @@ class Vidrasso extends Table {
         if (!in_array($card, array_keys($cards_in_hand))) {
             throw new BgaUserException(self::_('You do not have that card.'));
         }
-        $this->cards->moveCard($card_id, 'gift', self::getPlayerAfter($player_id));
+        $this->deck->moveCard($card_id, 'gift', self::getPlayerAfter($player_id));
         self::notifyPlayer($player_id, 'giftCard', '', ['cards' => $card_id]);
         $this->gamestate->setPlayerNonMultiactive($player_id, '');
     }
@@ -279,7 +279,7 @@ class Vidrasso extends Table {
     function playCard($card_id) {
         self::checkAction('playCard');
         $player_id = self::getActivePlayerId();
-        $current_card = $this->cards->getCard($card_id);
+        $current_card = $this->deck->getCard($card_id);
 
         // Sanity check. A more thorough check is done later.
         if ($current_card['location_arg'] != $player_id) {
@@ -288,7 +288,7 @@ class Vidrasso extends Table {
 
         // Collect all cards in hand and visible strawmen
         $available_cards = getPlayerHand($player_id);
-        $strawmen = getPlayerStrawmen($player_id);
+        $strawmen = $this->getPlayerStrawmen($player_id);
         foreach ($strawmen['visible'] as $straw_card) {
             if ($straw_card) {
                 $available_cards[$straw_cards['id']] = $straw_card;
@@ -309,7 +309,7 @@ class Vidrasso extends Table {
             if ($current_card['type'] != $led_suit && $current_card['type'] != $trump_suit && $current_card['type_arg'] != $trump_rank) {
                 // Verify the player has no cards of the led suit
                 foreach ($available_cards as $available_card_id) {
-                    $card = $this->cards->getCard($available_card_id);
+                    $card = $this->deck->getCard($available_card_id);
                     if ($card['type'] == $led_suit)
                         throw new BgaUserException(self::_('You cannot play off-suit'));
                 }
@@ -323,7 +323,7 @@ class Vidrasso extends Table {
                 $current_card['location'][6]);
         }
 
-        $this->cards->moveCard($card_id, 'cardsontable', $player_id);
+        $this->deck->moveCard($card_id, 'cardsontable', $player_id);
         if (self::getGameStateValue('ledSuit') == 0)
             self::setGameStateValue('ledSuit', $current_card['type']);
         self::notifyAllPlayers('playCard', clienttranslate('${player_name} plays ${value_displayed} ${color_displayed}'), [
@@ -346,8 +346,20 @@ class Vidrasso extends Table {
      * These methods function is to return some additional information that is specific to the current
      * game state.
      */
-    function argGiveCards() {
-        return [];
+    function argSelectTrump() {
+        $trump_suit = $this->getGameStateValue('trumpSuit');
+        $trump_rank = $this->getGameStateValue('trumpRank');
+        if (!$trump_suit && !$trump_rank) {
+            $rank_or_suit = clienttranslate('rank or suit');
+        } else if (!$trump_rank) {
+            $rank_or_suit = clienttranslate('rank');
+        } else {
+            $rank_or_suit = clienttranslate('suit');
+        }
+        return [
+            'i18n' => ['rank_or_suit'],
+            'rank_or_suit' => $rank_or_suit,
+        ];
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -358,17 +370,17 @@ class Vidrasso extends Table {
      * The action method of state X is called everytime the current game state is set to X.
      */
     function stNewHand() {
-        self::incStat(1, 'roundNumber');
+        $this->incGameStateValue('roundNumber', 1);
 
         // Shuffle deck
-        $this->cards->moveAllCardsInLocation(null, 'deck');
-        $this->cards->shuffle('deck');
+        $this->deck->moveAllCardsInLocation(null, 'deck');
+        $this->deck->shuffle('deck');
 
         // Deal cards
         $players = self::loadPlayersBasicInfos();
         $public_strawmen = [];
         foreach ($players as $player_id => $player) {
-            $hand_cards = $this->cards->pickCards(8, 'deck', $player_id);
+            $hand_cards = $this->deck->pickCards(8, 'deck', $player_id);
             $straw1 = $this->deck->pickCardsForLocation(2, 'deck', "straw_1_{$player_id}");
             $straw2 = $this->deck->pickCardsForLocation(2, 'deck', "straw_2_{$player_id}");
             $straw3 = $this->deck->pickCardsForLocation(2, 'deck', "straw_3_{$player_id}");
@@ -420,7 +432,7 @@ class Vidrasso extends Table {
 
     function stNextPlayer() {
         // Move to next player
-        if ($this->cards->countCardInLocation('cardsontable') != 2) {
+        if ($this->deck->countCardInLocation('cardsontable') != 2) {
             $player_id = self::activeNextPlayer();
             self::giveExtraTime($player_id);
             $this->gamestate->nextState('nextPlayer');
@@ -428,7 +440,7 @@ class Vidrasso extends Table {
         }
 
         // Resolve the trick
-        $cards_on_table = $this->cards->getCardsInLocation('cardsontable');
+        $cards_on_table = $this->deck->getCardsInLocation('cardsontable');
         $winning_player = null;
         $led_suit = self::getGameStateValue('ledSuit');
         $trump_rank = $this->getGameStateValue('trumpRank');
@@ -460,7 +472,7 @@ class Vidrasso extends Table {
         $this->gamestate->changeActivePlayer($winning_player);
 
         // Move all cards to the winner's scorepile
-        $this->cards->moveAllCardsInLocation('cardsontable', 'scorepile', null, $winning_player);
+        $this->deck->moveAllCardsInLocation('cardsontable', 'scorepile', null, $winning_player);
 
         // Notify
         // Note: we use 2 notifications here in order we can pause the display during the first notification
@@ -511,7 +523,7 @@ class Vidrasso extends Table {
             self::setGameStateValue('player2UsedStrawmanPile', 0);
         }
 
-        if ($this->cards->countCardInLocation('hand') == 0) {
+        if ($this->deck->countCardInLocation('hand') == 0) {
             // End of the hand
             $this->gamestate->nextState('endHand');
         } else {
@@ -524,7 +536,7 @@ class Vidrasso extends Table {
         // Count and score points, then end the game or go to the next hand.
         $players = self::loadPlayersBasicInfos();
 
-        $score_piles = getScorePiles();
+        $score_piles = $this->getScorePiles();
 
         $gift_cards_by_player = getCollectionFromDB('select card_location_arg id, card_type_arg type_arg from card where card_location = "gift"');
 
