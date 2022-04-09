@@ -238,7 +238,7 @@ class Vidrasso extends Table {
         // Make sure the second picker is allowed to pick this trump
         if ($first_picker_player != $player_id) {
             if ($trump_rank && $trump_type == 'rank' || $trump_suit && $trump_type == 'suit' ) {
-                throw new BgaUserException(self::_('You Cannot choose this trump type'));
+                throw new BgaUserException(self::_('You cannot choose this trump type'));
             }
         }
 
@@ -260,10 +260,9 @@ class Vidrasso extends Table {
         }
 
         if ($first_picker_player == $player_id) {
-            $this->activeNextPlayer();
             $this->gamestate->nextState('selectOtherTrump');
         } else {
-            $this->gamestate->nextState('selectGift');
+            $this->gamestate->nextState('giftCard');
         }
     }
 
@@ -405,6 +404,11 @@ class Vidrasso extends Table {
             'strawmen' => $public_strawmen,
         ]);
 
+        $this->gamestate->nextState('');
+    }
+
+	function stMakeNextPlayerActive() {
+		$this->activeNextPlayer();
         $this->gamestate->nextState('');
     }
 

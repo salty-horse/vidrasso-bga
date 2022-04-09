@@ -54,13 +54,14 @@ if (!defined('STATE_END_GAME')) {
 
 define('STATE_NEW_HAND', 2);
 define('STATE_SELECT_TRUMP', 3);
-define('STATE_GIFT_CARD', 4);
-define('STATE_FIRST_TRICK', 5);
-define('STATE_NEW_TRICK', 6);
-define('STATE_PLAYER_TURN', 7);
-define('STATE_NEXT_PLAYER', 8);
-define('STATE_REVEAL_STRAWMEN', 9);
-define('STATE_END_HAND', 10);
+define('STATE_NEXT_SELECTOR', 4);
+define('STATE_GIFT_CARD', 5);
+define('STATE_FIRST_TRICK', 6);
+define('STATE_NEW_TRICK', 7);
+define('STATE_PLAYER_TURN', 8);
+define('STATE_NEXT_PLAYER', 9);
+define('STATE_REVEAL_STRAWMEN', 10);
+define('STATE_END_HAND', 11);
 define('STATE_END_GAME', 99);
 }
 
@@ -92,8 +93,18 @@ $machinestates = [
         'possibleactions' => ['selectTrump'],
 		'args' => 'argSelectTrump',
         'transitions' => [
-            'selectOtherTrump' => STATE_SELECT_TRUMP,
+            'selectOtherTrump' => STATE_NEXT_SELECTOR,
             'giftCard' => STATE_GIFT_CARD,
+        ]
+    ],
+
+    STATE_NEXT_SELECTOR => [
+        'name' => 'nextSelector',
+        'description' => '',
+        'type' => 'game',
+        'action' => 'stMakeNextPlayerActive',
+        'transitions' => [
+            '' => STATE_SELECT_TRUMP,
         ]
     ],
 
