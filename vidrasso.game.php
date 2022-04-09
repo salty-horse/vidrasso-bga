@@ -242,6 +242,7 @@ class Vidrasso extends Table {
             }
         }
 
+        $players = self::loadPlayersBasicInfos();
         if ($trump_type == 'rank') {
             self::setGameStateValue('trumpRank', $trump_id);
             self::notifyAllPlayers('selectTrumpRank', clienttranslate('${player_name} selects ${rank} as the trump rank'), [
