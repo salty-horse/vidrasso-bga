@@ -68,10 +68,10 @@ function (dojo, declare) {
 
             // Create cards types:
             for (let suit = 1; suit <= 4; suit++) {
-                for (let value = 1; value <= 9; value++) {
+                for (let rank = 1; rank <= 9; rank++) {
                     // Build card type id
-                    let card_type_id = this.getCardUniqueId(suit, value);
-                    this.playerHand.addItemType(card_type_id, suit * 4 + value, g_gamethemeurl + 'img/cards.jpg', card_type_id);
+                    let card_type_id = this.getCardUniqueId(suit, rank);
+                    this.playerHand.addItemType(card_type_id, suit * 10 + rank, g_gamethemeurl + 'img/cards.jpg', card_type_id);
                 }
             }
 

@@ -20,14 +20,14 @@
  */
 
 $this->suits = [
-    1 => [ 'name' => clienttranslate('spade'),
-           'nametr' => self::_('spade') ],
-    2 => [ 'name' => clienttranslate('heart'),
-           'nametr' => self::_('heart') ],
-    3 => [ 'name' => clienttranslate('club'),
-           'nametr' => self::_('club') ],
-    4 => [ 'name' => clienttranslate('diamond'),
-           'nametr' => self::_('diamond') ]
+    1 => [ 'name' => clienttranslate('spades'),
+           'nametr' => self::_('spades') ],
+    2 => [ 'name' => clienttranslate('hearts'),
+           'nametr' => self::_('hearts') ],
+    3 => [ 'name' => clienttranslate('clubs'),
+           'nametr' => self::_('clubs') ],
+    4 => [ 'name' => clienttranslate('diamonds'),
+           'nametr' => self::_('diamonds') ]
 ];
 
 $this->values_label = [

@@ -267,8 +267,9 @@ class Vidrasso extends Table {
     }
 
     function giftCard($card_id) {
+        $player_id = self::getCurrentPlayerId();;
         $cards_in_hand = $this->deck->getPlayerHand($player_id);
-        if (!in_array($card, array_keys($cards_in_hand))) {
+        if (!in_array($card_id, array_keys($cards_in_hand))) {
             throw new BgaUserException(self::_('You do not have that card.'));
         }
         $this->deck->moveCard($card_id, 'gift', self::getPlayerAfter($player_id));
@@ -291,7 +292,7 @@ class Vidrasso extends Table {
         $strawmen = $this->getPlayerStrawmen($player_id);
         foreach ($strawmen['visible'] as $straw_card) {
             if ($straw_card) {
-                $available_cards[$straw_cards['id']] = $straw_card;
+                $available_cards[$straw_card['id']] = $straw_card;
             }
         }
 
@@ -317,7 +318,7 @@ class Vidrasso extends Table {
         }
 
         // Remember if the played card is a strawman
-        if (str_starts_with($current_card['location'], 'straw')) {
+        if (substr($current_card['location'], 0, 5) == 'straw') {
             self.setGameStateValue(
                 'player'.getPlayerNoById($player_id).'UsedStrawmanPile',
                 $current_card['location'][6]);
