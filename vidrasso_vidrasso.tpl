@@ -30,7 +30,7 @@
     <div>Trump suit: <span id="trump_suit">?</span></div>
 </div>
 
-<div id="trumpSelector">
+<div id="trumpSelector" style="display: none">
     <ul>
         <li data-type="rank" data-id="1">1</li>
         <li data-type="rank" data-id="2">2</li>
@@ -41,10 +41,10 @@
         <li data-type="rank" data-id="7">7</li>
         <li data-type="rank" data-id="8">8</li>
         <li data-type="rank" data-id="9">9</li>
-        <li data-type="suit" data-id="1">spade</li>
-        <li data-type="suit" data-id="2">heart</li>
-        <li data-type="suit" data-id="3">club</li>
-        <li data-type="suit" data-id="4">diamond</li>
+        <li data-type="suit" data-id="1">spades</li>
+        <li data-type="suit" data-id="2">hearts</li>
+        <li data-type="suit" data-id="3">clubs</li>
+        <li data-type="suit" data-id="4">diamonds</li>
     </ul>
 </div>
 

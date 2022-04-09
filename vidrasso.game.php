@@ -267,12 +267,12 @@ class Vidrasso extends Table {
     }
 
     function giftCard($card_id) {
-        $cards_in_hand = getPlayerHand($player_id);
+        $cards_in_hand = $this->deck->getPlayerHand($player_id);
         if (!in_array($card, array_keys($cards_in_hand))) {
             throw new BgaUserException(self::_('You do not have that card.'));
         }
         $this->deck->moveCard($card_id, 'gift', self::getPlayerAfter($player_id));
-        self::notifyPlayer($player_id, 'giftCard', '', ['cards' => $card_id]);
+        self::notifyPlayer($player_id, 'giftCard', '', ['card' => $card_id]);
         $this->gamestate->setPlayerNonMultiactive($player_id, '');
     }
 
@@ -287,7 +287,7 @@ class Vidrasso extends Table {
         }
 
         // Collect all cards in hand and visible strawmen
-        $available_cards = getPlayerHand($player_id);
+        $available_cards = $this->deck->getPlayerHand($player_id);
         $strawmen = $this->getPlayerStrawmen($player_id);
         foreach ($strawmen['visible'] as $straw_card) {
             if ($straw_card) {

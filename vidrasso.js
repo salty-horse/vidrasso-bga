@@ -24,10 +24,17 @@ define([
 function (dojo, declare) {
     return declare('bgagame.vidrasso', ebg.core.gamegui, {
         constructor: function(){
-            console.log('hearts constructor');
+            console.log('vidrasso constructor');
 
             this.cardwidth = 72;
             this.cardheight = 96;
+
+			this.suitSymbols = {
+				1: {text: '♠', color: 'black'},
+				2: {text: '♥', color: 'red'},
+				3: {text: '♣', color: 'black'},
+				4: {text: '♦', color: 'red'},
+			}
         },
 
         /*
@@ -61,10 +68,10 @@ function (dojo, declare) {
 
             // Create cards types:
             for (let suit = 1; suit <= 4; suit++) {
-                for (let value = 2; value <= 14; value++) {
+                for (let value = 1; value <= 9; value++) {
                     // Build card type id
                     let card_type_id = this.getCardUniqueId(suit, value);
-                    this.playerHand.addItemType(card_type_id, card_type_id, g_gamethemeurl + 'img/cards.jpg', card_type_id);
+                    this.playerHand.addItemType(card_type_id, suit * 4 + value, g_gamethemeurl + 'img/cards.jpg', card_type_id);
                 }
             }
 
@@ -86,12 +93,18 @@ function (dojo, declare) {
                 this.playCardOnTable(player_id, color, value, card.id);
             }
 
-            // Setup game notifications to handle (see 'setupNotifications' method below)
-            this.setupNotifications();
+			if (this.gamedatas.trumpRank != "0") {
+				let elem = document.getElementById('trump_rank');
+				elem.textContent = this.gamedatas.trumpRank;
+			}
 
-            console.log('Ending game setup');
-        },
-
+			if (this.gamedatas.trumpSuit != "0") {
+				let elem = document.getElementById('trump_suit');
+				let suit = this.suitSymbols[this.gamedatas.trumpSuit];
+				elem.textContent = suit.text;
+				elem.style.color = suit.color;
+			}
+		},
 
         ///////////////////////////////////////////////////
         //// Game & client states
@@ -103,19 +116,12 @@ function (dojo, declare) {
         {
             console.log('Entering state: '+stateName);
 
-            switch(stateName)
-            {
-
-            /* Example:
-
-            case 'myGameState':
-
-                // Show some HTML block at this game state
-                dojo.style('my_html_block_id', 'display', 'block');
-
+            switch (stateName) {
+            case 'selectTrump':
+				if(this.isCurrentPlayerActive()) {
+					dojo.style('#trumpSelector', 'display', 'block');
+				}
                 break;
-           */
-
 
             case 'dummmy':
                 break;
@@ -129,19 +135,10 @@ function (dojo, declare) {
         {
             console.log('Leaving state: '+stateName);
 
-            switch(stateName)
-            {
-
-            /* Example:
-
-            case 'myGameState':
-
-                // Hide the HTML block we are displaying only during this game state
-                dojo.style('my_html_block_id', 'display', 'none');
-
+            switch (stateName) {
+            case 'selectTrump':
+				dojo.style('#trumpSelector', 'display', 'none');
                 break;
-           */
-
 
             case 'dummmy':
                 break;
@@ -205,7 +202,12 @@ function (dojo, declare) {
 
         // Get card unique identifier based on its color and value
         getCardUniqueId : function(suit, rank) {
-            return (suit - 1) * 13 + (rank - 2);
+			if (rank == 1) {
+				rank = 12;
+			} else {
+				rank -= 2;
+			}
+            return (suit - 1) * 13 + rank;
         },
 
         playCardOnTable : function(player_id, color, value, card_id) {
@@ -251,20 +253,18 @@ function (dojo, declare) {
             var items = this.playerHand.getSelectedItems();
 
             if (items.length > 0) {
-                var action = 'playCard';
-                if (this.checkAction(action, true)) {
-                    // Can play a card
+                if (this.checkAction('playCard', true)) {
                     var card_id = items[0].id;
-                    this.ajaxcall('/' + this.game_name + '/' + this.game_name + '/' + action + '.html', {
+                    this.ajaxAction('playCard', {
                         id : card_id,
                         lock : true
-                    }, this, function(result) {
-                    }, function(is_error) {
                     });
-
-                    this.playerHand.unselectAll();
-                } else if (this.checkAction('giveCards')) {
-                    // Can give cards => let the player select some cards
+                } else if (this.checkAction('giftCard')) {
+                    var card_id = items[0].id;
+                    this.ajaxAction('giftCard', {
+                        id : card_id,
+                        lock : true
+                    });
                 } else {
                     this.playerHand.unselectAll();
                 }
@@ -309,10 +309,13 @@ function (dojo, declare) {
                   your template.game.php file.
 
         */
-        setupNotifications : function() {
+        setupNotifications : () => {
             console.log('notifications subscriptions setup');
 
             dojo.subscribe('newHand', this, 'notif_newHand');
+            dojo.subscribe('selectTrumpRank', this, 'notif_selectTrumpRank');
+            dojo.subscribe('selectTrumpSuit', this, 'notif_selectTrumpSuit');
+            dojo.subscribe('giftCard', this, 'notif_giftCard');
             dojo.subscribe('playCard', this, 'notif_playCard');
 
             dojo.subscribe('trickWin', this, 'notif_trickWin');
@@ -321,7 +324,7 @@ function (dojo, declare) {
             dojo.subscribe('newScores', this, 'notif_newScores');
         },
 
-        notif_newHand : function(notif) {
+        notif_newHand: (notif) => {
             // We received a new full hand of 13 cards.
             this.playerHand.removeAll();
 
@@ -333,27 +336,43 @@ function (dojo, declare) {
             }
         },
 
-        notif_playCard : function(notif) {
+        notif_selectTrumpRank: (notif) => {
+			let elem = document.getElementById('trump_rank');
+			elem.textContent = notif.args.rank;
+        },
+
+        notif_selectTrumpSuit: (notif) => {
+			let elem = document.getElementById('trump_suit');
+			let suit = this.suitSymbols[notif.args.suit];
+			elem.textContent = suit.text;
+			elem.style.color = suit.color;
+        },
+
+        notif_giftCard: (notif) => {
+			this.playerHand.removeFromStockById(notif.args.card);
+        },
+
+        notif_playCard: (notif) => {
             // Play a card on the table
             this.playCardOnTable(notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id);
         },
 
 
-        notif_trickWin : function(notif) {
+        notif_trickWin: (notif) => {
             // We do nothing here (just wait in order players can view the 4 cards played before they're gone.
         },
-        notif_giveAllCardsToPlayer : function(notif) {
+        notif_giveAllCardsToPlayer: (notif) => {
             // Move all cards on table to given table, then destroy them
             var winner_id = notif.args.player_id;
             for (var player_id in this.gamedatas.players) {
                 var anim = this.slideToObject('cardontable_' + player_id, 'overall_player_board_' + winner_id);
-                dojo.connect(anim, 'onEnd', function(node) {
+                dojo.connect(anim, 'onEnd', (node) => {
                     dojo.destroy(node);
                 });
                 anim.play();
             }
         },
-        notif_newScores : function(notif) {
+        notif_newScores: (notif) => {
             // Update players' scores
             for (var player_id in notif.args.newScores) {
                 this.scoreCtrl[player_id].toValue(notif.args.newScores[player_id]);
