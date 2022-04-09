@@ -198,6 +198,17 @@ class Vidrasso extends Table {
         ];
     }
 
+    function getCardStrength($card, $trump_suit, $led_suit) {
+        $value = 10 - $card['type_arg'];
+        if ($card['type'] == $trump_suit) {
+            $value += 100;
+        }
+        if ($card['type'] == $led_suit) {
+            $value += 50;
+        }
+        return $value;
+    }
+
     function getScorePiles() {
         $players = self::loadPlayersBasicInfos();
         $result = [];
@@ -309,8 +320,7 @@ class Vidrasso extends Table {
             $trump_suit = $this->getGameStateValue('trumpSuit');
             if ($current_card['type'] != $led_suit && $current_card['type'] != $trump_suit && $current_card['type_arg'] != $trump_rank) {
                 // Verify the player has no cards of the led suit
-                foreach ($available_cards as $available_card_id) {
-                    $card = $this->deck->getCard($available_card_id);
+                foreach ($available_cards as $available_card_id => $card) {
                     if ($card['type'] == $led_suit)
                         throw new BgaUserException(self::_('You cannot play off-suit'));
                 }
@@ -327,7 +337,7 @@ class Vidrasso extends Table {
         $this->deck->moveCard($card_id, 'cardsontable', $player_id);
         if (self::getGameStateValue('ledSuit') == 0)
             self::setGameStateValue('ledSuit', $current_card['type']);
-        self::notifyAllPlayers('playCard', clienttranslate('${player_name} plays ${value_displayed} ${color_displayed}'), [
+        self::notifyAllPlayers('playCard', clienttranslate('${player_name} plays the ${value_displayed} of ${color_displayed}'), [
             'i18n' => ['color_displayed','value_displayed'],
             'card_id' => $card_id,'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
@@ -336,7 +346,7 @@ class Vidrasso extends Table {
             'color' => $current_card ['type'],
             'color_displayed' => $this->suits[$current_card['type']]['name']]);
         // Next player
-        $this->gamestate->nextState('playCard');
+        $this->gamestate->nextState('');
     }
 
         //////////////////////////////////////////////////////////////////////////////
@@ -425,17 +435,6 @@ class Vidrasso extends Table {
         $this->gamestate->nextState();
     }
 
-    function getCardStrength($card, $trump_suit, $led_suit) {
-        $value = -$card['type_arg'];
-        if ($card['type'] == $trump_suit) {
-            $value -= 100;
-        }
-        if ($card['type'] == $led_suit) {
-            $value -= 50;
-        }
-        return $value;
-    }
-
     function stNextPlayer() {
         // Move to next player
         if ($this->deck->countCardInLocation('cardsontable') != 2) {
@@ -446,7 +445,7 @@ class Vidrasso extends Table {
         }
 
         // Resolve the trick
-        $cards_on_table = $this->deck->getCardsInLocation('cardsontable');
+        $cards_on_table = array_values($this->deck->getCardsInLocation('cardsontable'));
         $winning_player = null;
         $led_suit = self::getGameStateValue('ledSuit');
         $trump_rank = $this->getGameStateValue('trumpRank');
@@ -466,9 +465,9 @@ class Vidrasso extends Table {
             }
         } else {
             // Lowest value wins
-            $card_0_strength = getCardStrength($cards_on_table[0], $trump_suit, $led_suit);
-            $card_1_strength = getCardStrength($cards_on_table[1], $trump_suit, $led_suit);
-            if ($card_0_strength < $card_1_strength) {
+            $card_0_strength = $this->getCardStrength($cards_on_table[0], $trump_suit, $led_suit);
+            $card_1_strength = $this->getCardStrength($cards_on_table[1], $trump_suit, $led_suit);
+            if ($card_0_strength > $card_1_strength) {
                 $winning_player = $cards_on_table[0]['location_arg'];
             } else {
                 $winning_player = $cards_on_table[1]['location_arg'];
