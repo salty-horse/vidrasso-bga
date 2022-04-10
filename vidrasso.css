@@ -64,16 +64,6 @@
     height: 130px;
 }
 
-.playertable_N {
-    left: 50%;
-    top: 0px;
-    margin-left: -90px; /* half of 180 */
-}
-.playertable_S {
-    left: 50%;
-    bottom: 0px;
-    margin-left: -90px; /* half of 180 */
-}
 .playertable_W {
     left: 0px;
     top: 50%;

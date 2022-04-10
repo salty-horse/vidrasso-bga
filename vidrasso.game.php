@@ -267,6 +267,7 @@ class Vidrasso extends Table {
                 'player_id' => $player_id,
                 'player_name' => $players[$player_id]['player_name'],
                 'suit' => $this->suits[$trump_id]['name'],
+                'suit_id' => $trump_id,
             ]);
         }
 

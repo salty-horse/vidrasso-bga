@@ -18,6 +18,8 @@
 define([
     'dojo',
     'dojo/_base/declare',
+    'dojo/dom',
+    'dojo/on',
     'ebg/core/gamegui',
     'ebg/counter',
     'ebg/stock'
@@ -58,6 +60,7 @@ function (dojo, declare) {
 
             // Player hand
             this.playerHand = new ebg.stock();
+            this.playerHand.setSelectionMode(1);
             this.playerHand.create(this, $('myhand'), this.cardwidth, this.cardheight);
             this.playerHand.image_items_per_row = 13;
 
@@ -317,7 +320,7 @@ function (dojo, declare) {
                   your template.game.php file.
 
         */
-        setupNotifications : () => {
+        setupNotifications: function() {
             console.log('notifications subscriptions setup');
 
             dojo.subscribe('newHand', this, 'notif_newHand');
@@ -332,7 +335,7 @@ function (dojo, declare) {
             dojo.subscribe('newScores', this, 'notif_newScores');
         },
 
-        notif_newHand: (notif) => {
+        notif_newHand: function(notif) {
             // We received a new full hand of 13 cards.
             this.playerHand.removeAll();
 
@@ -344,32 +347,32 @@ function (dojo, declare) {
             }
         },
 
-        notif_selectTrumpRank: (notif) => {
+        notif_selectTrumpRank: function(notif) {
             let elem = document.getElementById('trump_rank');
             elem.textContent = notif.args.rank;
         },
 
-        notif_selectTrumpSuit: (notif) => {
+        notif_selectTrumpSuit: function(notif) {
             let elem = document.getElementById('trump_suit');
             let suit = this.suitSymbols[notif.args.suit];
             elem.textContent = suit.text;
             elem.style.color = suit.color;
         },
 
-        notif_giftCard: (notif) => {
+        notif_giftCard: function(notif) {
             this.playerHand.removeFromStockById(notif.args.card);
         },
 
-        notif_playCard: (notif) => {
+        notif_playCard: function(notif) {
             // Play a card on the table
             this.playCardOnTable(notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id);
         },
 
 
-        notif_trickWin: (notif) => {
+        notif_trickWin: function(notif) {
             // We do nothing here (just wait in order players can view the 4 cards played before they're gone.
         },
-        notif_giveAllCardsToPlayer: (notif) => {
+        notif_giveAllCardsToPlayer: function(notif) {
             // Move all cards on table to given table, then destroy them
             var winner_id = notif.args.player_id;
             for (var player_id in this.gamedatas.players) {
@@ -380,7 +383,7 @@ function (dojo, declare) {
                 anim.play();
             }
         },
-        notif_newScores: (notif) => {
+        notif_newScores: function(notif) {
             // Update players' scores
             for (var player_id in notif.args.newScores) {
                 this.scoreCtrl[player_id].toValue(notif.args.newScores[player_id]);
