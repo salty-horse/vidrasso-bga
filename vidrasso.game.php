@@ -295,7 +295,7 @@ class Vidrasso extends Table {
         $current_card = $this->deck->getCard($card_id);
 
         // Sanity check. A more thorough check is done later.
-        if ($current_card['location_arg'] != $player_id) {
+        if ($current_card['location'] == 'hand' && $current_card['location_arg'] != $player_id) {
             throw new BgaUserException(self::_('You do not have this card'));
         }
 
@@ -330,8 +330,8 @@ class Vidrasso extends Table {
 
         // Remember if the played card is a strawman
         if (substr($current_card['location'], 0, 5) == 'straw') {
-            self.setGameStateValue(
-                'player'.getPlayerNoById($player_id).'UsedStrawmanPile',
+            self::setGameStateValue(
+                'player'.self::getPlayerNoById($player_id).'UsedStrawmanPile',
                 $current_card['location'][6]);
         }
 
@@ -529,7 +529,8 @@ class Vidrasso extends Table {
             self::setGameStateValue('player2UsedStrawmanPile', 0);
         }
 
-        if ($this->deck->countCardInLocation('hand') == 0) {
+        $remaining_card_count = self::getUniqueValueFromDB('select count(*) from card where card_location = "hand" or card_location like "straw%"');
+        if ($remaining_card_count == 0) {
             // End of the hand
             $this->gamestate->nextState('endHand');
         } else {
@@ -544,7 +545,7 @@ class Vidrasso extends Table {
 
         $score_piles = $this->getScorePiles();
 
-        $gift_cards_by_player = getCollectionFromDB('select card_location_arg id, card_type_arg type_arg from card where card_location = "gift"');
+        $gift_cards_by_player = self::getCollectionFromDB('select card_location_arg id, card_type_arg type_arg from card where card_location = "gift"');
 
         // Apply scores to player
         foreach ($score_piles as $player_id => $score_pile) {

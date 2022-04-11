@@ -32,28 +32,28 @@ class view_vidrasso_vidrasso extends game_view {
     function build_page($viewArgs) {
         // Get players & players number
         $players = $this->game->loadPlayersBasicInfos();
-        $players_nbr = count($players);
         /**
          * ********* Place your code below: ***********
          */
         $template = self::getGameName() . '_' . self::getGameName();
-        
-        $directions = ['W', 'E'];
+
+        global $g_user;
+        $current_player_id = $g_user->get_id();
         
         $this->page->begin_block($template, 'player');
-        foreach ( $players as $player_id => $info ) {
-            $dir = array_shift($directions);
+        foreach ($players as $player_id => $info) {
+            $dir = ($player_id == $current_player_id) ? 'W': 'E';
             $this->page->insert_block('player', [
                 'PLAYER_ID' => $player_id,
-                'PLAYER_NAME' => $players [$player_id] ['player_name'],
-                'PLAYER_COLOR' => $players [$player_id] ['player_color'],
+                'PLAYER_NAME' => $players[$player_id]['player_name'],
+                'PLAYER_COLOR' => $players[$player_id]['player_color'],
                 'DIR' => $dir
             ]);
         }
         
+        $this->tpl['MY_PLAYER_ID'] = $current_player_id;
         $this->tpl['MY_HAND'] = self::_('My hand');
-    
-    
+        $this->tpl['MY_STRAWMEN'] = self::_('My strawmen');
       /*********** Do not change anything below this line  ************/
     }
 }

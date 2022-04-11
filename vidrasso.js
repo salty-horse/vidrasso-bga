@@ -29,8 +29,8 @@ function (dojo, declare) {
         constructor: function(){
             console.log('vidrasso constructor');
 
-            this.cardwidth = 72;
-            this.cardheight = 96;
+            this.cardWidth = 72;
+            this.cardHeight = 96;
 
             this.suitSymbols = {
                 1: {text: '♠', color: 'black'},
@@ -61,7 +61,7 @@ function (dojo, declare) {
             // Player hand
             this.playerHand = new ebg.stock();
             this.playerHand.setSelectionMode(1);
-            this.playerHand.create(this, $('myhand'), this.cardwidth, this.cardheight);
+            this.playerHand.create(this, $('myhand'), this.cardWidth, this.cardHeight);
             this.playerHand.image_items_per_row = 13;
 
             dojo.connect(this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged');
@@ -70,7 +70,11 @@ function (dojo, declare) {
                 dojo.connect(node, 'onclick', this, 'onChoosingTrump');
             });
 
-            // Create cards types:
+            dojo.query('#mystrawmen .straw').forEach((node, index, arr) => {
+                dojo.connect(node, 'onclick', this, 'onChoosingStrawman');
+            });
+
+            // Create cards types
             for (let suit = 1; suit <= 4; suit++) {
                 for (let rank = 1; rank <= 9; rank++) {
                     // Build card type id
@@ -86,6 +90,20 @@ function (dojo, declare) {
                 var color = card.type;
                 var value = card.type_arg;
                 this.playerHand.addToStockWithId(this.getCardUniqueId(color, value), card.id);
+            }
+
+            // Strawmen
+            for (const [player_id, player_info] of Object.entries(this.gamedatas.players)) {
+                // FIXME
+                if (!document.getElementById(`playerstraw_${player_id}_1`)) continue;
+
+                for (const [ix, straw] of player_info.visible_strawmen.entries()) {
+                    if (!straw) continue;
+                    this.setStrawman(player_id, ix + 1, straw.type, straw.type_arg, straw.id);
+                    if (player_info.more_strawmen[ix]) {
+                        document.getElementById(`straw_${player_id}_${ix+1}`).classList.add('straw_more');
+                    }
+                }
             }
 
             // Cards played on table
@@ -211,8 +229,7 @@ function (dojo, declare) {
             this.ajaxcall(`/vidrasso/vidrasso/${action}.html`, args, this, func, err);
         },
 
-        // Get card unique identifier based on its color and value
-        getCardUniqueId : function(suit, rank) {
+        getCardUniqueId: function(suit, rank) {
             if (rank == 1) {
                 rank = 12;
             } else {
@@ -221,11 +238,35 @@ function (dojo, declare) {
             return (suit - 1) * 13 + rank;
         },
 
-        playCardOnTable : function(player_id, color, value, card_id) {
-            // player_id => direction
+        getCardSpriteXY: function(suit, rank) {
+            if (rank == 1) {
+                rank = 12;
+            } else {
+                rank -= 2;
+            }
+            return {
+                x: this.cardWidth * rank,
+                y: this.cardHeight * (suit - 1),
+            }
+        },
+
+        setStrawman: function(player_id, straw_num, suit, rank, card_id) {
+            let spriteCoords = this.getCardSpriteXY(suit, rank);
+            let elem = document.getElementById(`playerstraw_${player_id}_${straw_num}`);
+            elem.dataset.id = card_id;
+            dojo.place(this.format_block('jstpl_strawman', {
+                x: spriteCoords.x,
+                y: spriteCoords.y,
+                player_id: player_id,
+                straw_num: straw_num,
+            }), elem);
+        },
+
+        playCardOnTable: function(player_id, suit, rank, card_id) {
+            let spriteCoords = this.getCardSpriteXY(suit, rank);
             dojo.place(this.format_block('jstpl_cardontable', {
-                x : this.cardwidth * (value - 2),
-                y : this.cardheight * (color - 1),
+                x : spriteCoords.x,
+                y : spriteCoords.y,
                 player_id : player_id
             }), 'playertablecard_' + player_id);
 
@@ -258,23 +299,21 @@ function (dojo, declare) {
          *
          */
 
-
-
-        onPlayerHandSelectionChanged : function() {
+        onPlayerHandSelectionChanged: function() {
             var items = this.playerHand.getSelectedItems();
 
             if (items.length > 0) {
                 if (this.checkAction('playCard', true)) {
                     var card_id = items[0].id;
                     this.ajaxAction('playCard', {
-                        id : card_id,
-                        lock : true
+                        id: card_id,
+                        lock: true
                     });
                 } else if (this.checkAction('giftCard')) {
                     var card_id = items[0].id;
                     this.ajaxAction('giftCard', {
-                        id : card_id,
-                        lock : true
+                        id: card_id,
+                        lock: true
                     });
                 } else {
                     this.playerHand.unselectAll();
@@ -282,11 +321,25 @@ function (dojo, declare) {
             }
         },
 
-        onChoosingTrump : function(event) {
+        onChoosingStrawman: function(event) {
+            if (!this.checkAction('playCard', true))
+                return;
+
+            let card_id = event.currentTarget.dataset.id;
+            if (!card_id)
+                return;
+
+            this.ajaxAction('playCard', {
+                id: card_id,
+                lock: true
+            });
+        },
+
+        onChoosingTrump: function(event) {
             if (!this.checkAction('selectTrump'))
                 return;
 
-            let data = event.target.dataset;
+            let data = event.currentTarget.dataset;
             this.ajaxAction('selectTrump', {
                 trump_type: data.type,
                 id: data.id,
@@ -354,7 +407,7 @@ function (dojo, declare) {
 
         notif_selectTrumpSuit: function(notif) {
             let elem = document.getElementById('trump_suit');
-            let suit = this.suitSymbols[notif.args.suit];
+            let suit = this.suitSymbols[notif.args.suit_id];
             elem.textContent = suit.text;
             elem.style.color = suit.color;
         },

@@ -62,6 +62,16 @@
 
 </div>
 
+<div id="mystrawmen_wrap" class="whiteblock">
+    <h3>{MY_STRAWMEN}</h3>
+    <div id="mystrawmen">
+        <div class="straw" id="playerstraw_{MY_PLAYER_ID}_1"></div>
+        <div class="straw" id="playerstraw_{MY_PLAYER_ID}_2"></div>
+        <div class="straw" id="playerstraw_{MY_PLAYER_ID}_3"></div>
+        <div class="straw" id="playerstraw_{MY_PLAYER_ID}_4"></div>
+        <div class="straw" id="playerstraw_{MY_PLAYER_ID}_5"></div>
+    </div>
+</div>
 <div id="myhand_wrap" class="whiteblock">
     <h3>{MY_HAND}</h3>
     <div id="myhand">
@@ -73,8 +83,8 @@
 
 // Javascript HTML templates
 
-var jstpl_cardontable = '<div class="cardontable" id="cardontable_${player_id}" style="background-position:-${x}px -${y}px">\
-                        </div>';
+var jstpl_cardontable = '<div class="cardontable" id="cardontable_${player_id}" style="background-position:-${x}px -${y}px"></div>';
+var jstpl_strawman = '<div class="strawcard" id="straw_${player_id}_${straw_num}" style="background-position:-${x}px -${y}px"></div>';
 
 </script>
 
