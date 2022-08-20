@@ -385,6 +385,8 @@ class Vidrasso extends Table {
      */
     function stNewHand() {
         $this->incGameStateValue('roundNumber', 1);
+        self::setGameStateValue('trumpRank', 0);
+        self::setGameStateValue('trumpSuit', 0);
 
         // Shuffle deck
         $this->deck->moveAllCardsInLocation(null, 'deck');
@@ -421,8 +423,8 @@ class Vidrasso extends Table {
         $this->gamestate->nextState('');
     }
 
-	function stMakeNextPlayerActive() {
-		$this->activeNextPlayer();
+    function stMakeNextPlayerActive() {
+        $this->activeNextPlayer();
         $this->gamestate->nextState('');
     }
 
@@ -433,7 +435,7 @@ class Vidrasso extends Table {
     }
 
     function stNewTrick() {
-        // New trick: active the player who wins the last trick, or the player who own the club-2 card
+        // New trick: Set active the player who wins the last trick, or the player who own the club-2 card
         self::setGameStateValue('ledSuit', 0);
         $this->gamestate->nextState();
     }

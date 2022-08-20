@@ -405,6 +405,9 @@ function (dojo, declare) {
         },
 
         notif_newHand: function(notif) {
+            document.getElementById('trump_rank').textContent = '';
+            document.getElementById('trump_suit').textContent = '';
+
             // We received a new full hand of 13 cards.
             this.playerHand.removeAll();
 
