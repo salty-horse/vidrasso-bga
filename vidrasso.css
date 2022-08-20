@@ -107,8 +107,6 @@
     left: 0px;
 }
 
-/*** cards on table ***/
-
 .cardontable {
     position: absolute;
     width: 72px;
@@ -117,4 +115,18 @@
     z-index: 2;
 }
 
+#trumpSelector ul {
+    display: inline-block;
+    list-style-type: none;
+    overflow: hidden;
+}
 
+#trumpSelector li {
+    float: left;
+    padding: 1em;
+    border: 1px solid black;
+    margin: 1em;
+    height: 1em;
+    width: 1em;
+    text-align: center;
+}

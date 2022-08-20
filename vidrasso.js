@@ -155,6 +155,8 @@ function (dojo, declare) {
             case 'selectTrump':
                 if(this.isCurrentPlayerActive()) {
                     document.getElementById('trumpSelector').style.display = 'block';
+                    document.getElementById('rankSelector').style.display = (this.gamedatas.trumpRank == "0") ? 'block' : 'none';
+                    document.getElementById('suitSelector').style.display = (this.gamedatas.trumpSuit == "0") ? 'block' : 'none';
                 }
                 break;
 
@@ -420,15 +422,19 @@ function (dojo, declare) {
         },
 
         notif_selectTrumpRank: function(notif) {
+            this.gamedatas.trumpRank = notif.args.rank;
             let elem = document.getElementById('trump_rank');
             elem.textContent = notif.args.rank;
+            document.getElementById('rankSelector').style.display = 'none';
         },
 
         notif_selectTrumpSuit: function(notif) {
+            this.gamedatas.trumpSuit = notif.args.suit_id;
             let elem = document.getElementById('trump_suit');
             let suit = this.suitSymbols[notif.args.suit_id];
             elem.textContent = suit.text;
             elem.style.color = suit.color;
+            document.getElementById('suitSelector').style.display = 'none';
         },
 
         notif_giftCard: function(notif) {

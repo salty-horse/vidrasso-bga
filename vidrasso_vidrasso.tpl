@@ -31,7 +31,7 @@
 </div>
 
 <div id="trumpSelector" style="display: none">
-    <ul>
+    <ul id="rankSelector">
         <li data-type="rank" data-id="1">1</li>
         <li data-type="rank" data-id="2">2</li>
         <li data-type="rank" data-id="3">3</li>
@@ -41,10 +41,13 @@
         <li data-type="rank" data-id="7">7</li>
         <li data-type="rank" data-id="8">8</li>
         <li data-type="rank" data-id="9">9</li>
-        <li data-type="suit" data-id="1">spades</li>
-        <li data-type="suit" data-id="2">hearts</li>
-        <li data-type="suit" data-id="3">clubs</li>
-        <li data-type="suit" data-id="4">diamonds</li>
+    </ul>
+    <br>
+    <ul id="suitSelector">
+        <li data-type="suit" data-id="1">♠</li>
+        <li data-type="suit" style="color: red" data-id="2">♥</li>
+        <li data-type="suit" data-id="3">♣</li>
+        <li data-type="suit" style="color: red" data-id="4">♦</li>
     </ul>
 </div>
 
