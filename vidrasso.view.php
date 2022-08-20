@@ -49,11 +49,15 @@ class view_vidrasso_vidrasso extends game_view {
                 'PLAYER_COLOR' => $players[$player_id]['player_color'],
                 'DIR' => $dir
             ]);
+            if ($player_id != $current_player_id) {
+                $this->tpl['OP_PLAYER_ID'] = $player_id;
+            }
         }
         
         $this->tpl['MY_PLAYER_ID'] = $current_player_id;
         $this->tpl['MY_HAND'] = self::_('My hand');
         $this->tpl['MY_STRAWMEN'] = self::_('My strawmen');
+        $this->tpl['OP_STRAWMEN'] = self::_("Opponent's strawmen");
       /*********** Do not change anything below this line  ************/
     }
 }

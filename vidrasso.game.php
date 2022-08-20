@@ -135,6 +135,8 @@ class Vidrasso extends Table {
         // Cards in player hand
         $result['hand'] = $this->deck->getCardsInLocation('hand', $current_player_id);
 
+        // TODO: Hand size of opponent
+
         // Cards played on the table
         $result['cardsontable'] = $this->deck->getCardsInLocation('cardsontable');
 
@@ -515,13 +517,14 @@ class Vidrasso extends Table {
                     if ($remaining_cards_in_pile) {
                         $revealed_cards_by_player[$player_id] = [
                             'pile' => $pile,
-                            'new_card' => array_keys($remaining_cards_in_pile)[0],
+                            'card' => array_shift($remaining_cards_in_pile),
                         ];
                     }
                 }
             }
 
-            self::notifyAllPlayers('revealStrawman', clienttranslate(''), [
+            self::dump('revealed_cards_by_player', $revealed_cards_by_player);
+            self::notifyAllPlayers('revealStrawmen', '', [
                 'revealed_cards' => $revealed_cards_by_player,
             ]);
 

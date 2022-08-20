@@ -92,6 +92,10 @@ function (dojo, declare) {
                 this.playerHand.addToStockWithId(this.getCardUniqueId(color, value), card.id);
             }
 
+            // Mapping between strawmen card IDs and elements
+            this.strawmenById = {};
+
+
             // Strawmen
             for (const [player_id, player_info] of Object.entries(this.gamedatas.players)) {
                 // FIXME
@@ -101,7 +105,9 @@ function (dojo, declare) {
                     if (!straw) continue;
                     this.setStrawman(player_id, ix + 1, straw.type, straw.type_arg, straw.id);
                     if (player_info.more_strawmen[ix]) {
-                        document.getElementById(`straw_${player_id}_${ix+1}`).classList.add('straw_more');
+                        let more = document.createElement('div')
+                        more.className = 'straw_more'
+                        document.getElementById(`straw_${player_id}_${ix+1}`).parentNode.appendChild(more);
                     }
                 }
             }
@@ -260,6 +266,9 @@ function (dojo, declare) {
                 player_id: player_id,
                 straw_num: straw_num,
             }), elem);
+            let newElem = elem.querySelector('.strawcard');
+            this.strawmenById[card_id] = newElem;
+            return newElem;
         },
 
         playCardOnTable: function(player_id, suit, rank, card_id) {
@@ -270,17 +279,23 @@ function (dojo, declare) {
                 player_id : player_id
             }), 'playertablecard_' + player_id);
 
-            if (player_id != this.player_id) {
-                // Some opponent played a card
-                // Move card from player panel
-                this.placeOnObject('cardontable_' + player_id, 'overall_player_board_' + player_id);
+            let strawElem = this.strawmenById[card_id];
+            if (strawElem) {
+                this.placeOnObject('cardontable_' + player_id, strawElem.id);
+                strawElem.remove();
+                delete this.strawmenById[card_id];
             } else {
-                // You played a card. If it exists in your hand, move card from there and remove
-                // corresponding item
-
-                if ($('myhand_item_' + card_id)) {
-                    this.placeOnObject('cardontable_' + player_id, 'myhand_item_' + card_id);
-                    this.playerHand.removeFromStockById(card_id);
+                if (player_id != this.player_id) {
+                    // Some opponent played a card
+                    // Move card from player panel
+                    this.placeOnObject('cardontable_' + player_id, 'overall_player_board_' + player_id);
+                } else {
+                    // You played a card. If it exists in your hand, move card from there and remove
+                    // corresponding item
+                    if ($('myhand_item_' + card_id)) {
+                        this.placeOnObject('cardontable_' + player_id, 'myhand_item_' + card_id);
+                        this.playerHand.removeFromStockById(card_id);
+                    }
                 }
             }
 
@@ -381,6 +396,7 @@ function (dojo, declare) {
             dojo.subscribe('selectTrumpSuit', this, 'notif_selectTrumpSuit');
             dojo.subscribe('giftCard', this, 'notif_giftCard');
             dojo.subscribe('playCard', this, 'notif_playCard');
+            dojo.subscribe('revealStrawmen', this, 'notif_revealStrawmen');
 
             dojo.subscribe('trickWin', this, 'notif_trickWin');
             this.notifqueue.setSynchronous('trickWin', 1000);
@@ -421,15 +437,31 @@ function (dojo, declare) {
             this.playCardOnTable(notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id);
         },
 
+        notif_revealStrawmen: function(notif) {
+            for (let [player_id, revealed_card] of Object.entries(notif.args.revealed_cards)) {
+                let pile_id = revealed_card.pile;
+                let card = revealed_card.card;
+
+                let pileElem = document.getElementById(`playerstraw_${player_id}_${pile_id}`);
+                let more = pileElem.querySelector('.straw_more');
+                if (more) {
+                    this.fadeOutAndDestroy(more);
+                }
+                let newCard = this.setStrawman(player_id, pile_id, card.type, card.type_arg, card.id);
+                newCard.style.opacity = 0;
+                dojo.fadeIn({node: newCard}).play();
+            }
+        },
 
         notif_trickWin: function(notif) {
             // We do nothing here (just wait in order players can view the 4 cards played before they're gone.
         },
+
         notif_giveAllCardsToPlayer: function(notif) {
             // Move all cards on table to given table, then destroy them
             var winner_id = notif.args.player_id;
             for (var player_id in this.gamedatas.players) {
-                var anim = this.slideToObject('cardontable_' + player_id, 'overall_player_board_' + winner_id);
+                var anim = this.slideToObject('cardontable_' + player_id, 'cardontable_' + winner_id);
                 dojo.connect(anim, 'onEnd', (node) => {
                     dojo.destroy(node);
                 });

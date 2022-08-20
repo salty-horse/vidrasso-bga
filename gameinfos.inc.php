@@ -26,6 +26,10 @@ $gameinfos = [
 // Game publisher
 'publisher' => '',
 
+'presentation' => [
+    totranslate("A two-player trick-taking game with strawmen where players pick the trump suit and rank."),
+],
+
 // Url of game publisher website
 'publisher_website' => '',
 

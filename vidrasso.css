@@ -50,7 +50,7 @@
 #playertables {
     position: relative;
     width: 710px;
-    height: 340px;
+    height: 170px;
 }
 
 .playertablename {
@@ -66,13 +66,9 @@
 
 .playertable_W {
     left: 0px;
-    top: 50%;
-    margin-top: -55px; /* half of 130 */
 }
 .playertable_E {
     right: 0px;
-    top: 50%;
-    margin-top: -55px; /* half of 130 */
 }
 
 .playertablecard {
@@ -94,14 +90,21 @@
 }
 
 .strawcard {
+    cursor: pointer;
     position: absolute;
     width: 72px;
     height: 96px;
     background-image: url('img/cards.jpg');
+    z-index: 1;
 }
 
 .straw_more {
-    box-shadow: -5px -5px rgb(66, 123, 245);
+    background-color: rgb(66, 123, 245);
+    width: 72px;
+    height: 96px;
+    position: absolute;
+    top: -5px;
+    left: 0px;
 }
 
 /*** cards on table ***/
@@ -111,6 +114,7 @@
     width: 72px;
     height: 96px;
     background-image: url('img/cards.jpg');
+    z-index: 2;
 }
 
 

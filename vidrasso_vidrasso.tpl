@@ -48,6 +48,16 @@
     </ul>
 </div>
 
+<div id="opstrawmen_wrap" class="whiteblock">
+    <h3>{OP_STRAWMEN}</h3>
+    <div id="opstrawmen">
+        <div class="straw" id="playerstraw_{OP_PLAYER_ID}_1"></div>
+        <div class="straw" id="playerstraw_{OP_PLAYER_ID}_2"></div>
+        <div class="straw" id="playerstraw_{OP_PLAYER_ID}_3"></div>
+        <div class="straw" id="playerstraw_{OP_PLAYER_ID}_4"></div>
+        <div class="straw" id="playerstraw_{OP_PLAYER_ID}_5"></div>
+    </div>
+</div>
 <div id="playertables">
 
     <!-- BEGIN player -->
