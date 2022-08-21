@@ -54,7 +54,7 @@ function (dojo, declare) {
         */
 
 
-        setup : function(gamedatas) {
+        setup: function(gamedatas) {
             console.log('Starting game setup');
             console.log('gamedatas', gamedatas);
 
@@ -154,9 +154,9 @@ function (dojo, declare) {
             switch (stateName) {
             case 'selectTrump':
                 if(this.isCurrentPlayerActive()) {
-                    document.getElementById('trumpSelector').style.display = 'block';
-                    document.getElementById('rankSelector').style.display = (this.gamedatas.trumpRank == "0") ? 'block' : 'none';
-                    document.getElementById('suitSelector').style.display = (this.gamedatas.trumpSuit == "0") ? 'block' : 'none';
+                    document.getElementById('playertables').style.display = 'none';
+                    document.getElementById('rankSelector').style.display = (this.gamedatas.trumpRank == "0") ? 'inline-block' : 'none';
+                    document.getElementById('suitSelector').style.display = (this.gamedatas.trumpSuit == "0") ? 'inline-block' : 'none';
                 }
                 break;
 
@@ -174,7 +174,9 @@ function (dojo, declare) {
 
             switch (stateName) {
             case 'selectTrump':
-                document.getElementById('trumpSelector').style.display = 'none';
+                document.getElementById('rankSelector').style.display = 'none';
+                document.getElementById('suitSelector').style.display = 'none';
+                document.getElementById('playertables').style.display = 'block';
                 break;
 
             case 'dummmy':

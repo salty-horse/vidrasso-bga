@@ -31,7 +31,7 @@ $this->suits = [
 ];
 
 $this->values_label = [
-    1 => clienttranslate('A'),
+    1 => '1',
     2 => '2',
     3 => '3',
     4 => '4',

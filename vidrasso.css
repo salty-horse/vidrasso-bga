@@ -48,9 +48,9 @@
 /** Table layout **/
 
 #playertables {
-    position: relative;
-    width: 710px;
+    float: left;
     height: 170px;
+    margin-left: 30px;
 }
 
 .playertablename {
@@ -58,18 +58,66 @@
 }
 
 .playertable {
-    position: absolute;
     text-align: center;
     width: 180px;
     height: 130px;
+    float: left;
+    margin-right: 60px;
 }
 
-.playertable_W {
-    left: 0px;
+#trumpSelector {
+    height: 130px;
+    float: left;
+    display: block;
 }
-.playertable_E {
-    right: 0px;
+
+#trumpSelector > div {
+    display: flex;
+    align-items: center
 }
+
+
+#trumpSelector > div > div {
+    height: 1em;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+#rankSelector {
+    display: none;
+}
+
+#suitSelector {
+    display: none;
+}
+
+#trump_rank {
+    margin: 1em;
+    height: 1em;
+    width: 1em;
+}
+
+#trump_suit {
+    margin: 1em;
+    height: 1em;
+    width: 1em;
+}
+
+#infobox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 180px;
+    height: 170px;
+}
+
+#gameinfo {
+    display: inline;
+    vertical-align: middle;
+}
+
 
 .playertablecard {
     display: inline-block;
@@ -116,7 +164,6 @@
 }
 
 #trumpSelector ul {
-    display: inline-block;
     list-style-type: none;
     overflow: hidden;
 }
@@ -124,7 +171,8 @@
 #trumpSelector li {
     float: left;
     padding: 1em;
-    border: 1px solid black;
+    outline: 1px solid black;
+    outline-offset: -2px;
     margin: 1em;
     height: 1em;
     width: 1em;

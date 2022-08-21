@@ -25,32 +25,6 @@
     Please REMOVE this comment before publishing your game on BGA
 -->
 
-<div id="gameinfo">
-    <div>Trump rank: <span id="trump_rank">?</span></div>
-    <div>Trump suit: <span id="trump_suit">?</span></div>
-</div>
-
-<div id="trumpSelector" style="display: none">
-    <ul id="rankSelector">
-        <li data-type="rank" data-id="1">1</li>
-        <li data-type="rank" data-id="2">2</li>
-        <li data-type="rank" data-id="3">3</li>
-        <li data-type="rank" data-id="4">4</li>
-        <li data-type="rank" data-id="5">5</li>
-        <li data-type="rank" data-id="6">6</li>
-        <li data-type="rank" data-id="7">7</li>
-        <li data-type="rank" data-id="8">8</li>
-        <li data-type="rank" data-id="9">9</li>
-    </ul>
-    <br>
-    <ul id="suitSelector">
-        <li data-type="suit" data-id="1">♠</li>
-        <li data-type="suit" style="color: red" data-id="2">♥</li>
-        <li data-type="suit" data-id="3">♣</li>
-        <li data-type="suit" style="color: red" data-id="4">♦</li>
-    </ul>
-</div>
-
 <div id="opstrawmen_wrap" class="whiteblock">
     <h3>{OP_STRAWMEN}</h3>
     <div id="opstrawmen">
@@ -61,6 +35,9 @@
         <div class="straw" id="playerstraw_{OP_PLAYER_ID}_5"></div>
     </div>
 </div>
+
+<div id="centerarea">
+
 <div id="playertables">
 
     <!-- BEGIN player -->
@@ -72,6 +49,41 @@
         </div>
     </div>
     <!-- END player -->
+
+</div>
+
+<div id="trumpSelector">
+    <div>
+    <div>Trump rank:</div>
+    <div id="trump_rank"></div>
+    <ul id="rankSelector">
+        <li data-type="rank" data-id="1">1</li>
+        <li data-type="rank" data-id="2">2</li>
+        <li data-type="rank" data-id="3">3</li>
+        <li data-type="rank" data-id="4">4</li>
+        <li data-type="rank" data-id="5">5</li>
+        <li data-type="rank" data-id="6">6</li>
+        <li data-type="rank" data-id="7">7</li>
+        <li data-type="rank" data-id="8">8</li>
+        <li data-type="rank" data-id="9">9</li>
+    </ul>
+    </div>
+    <div>
+    <div>Trump suit:</div>
+    <div id="trump_suit"></div>
+    <ul id="suitSelector">
+        <li data-type="suit" data-id="1">♠</li>
+        <li data-type="suit" style="color: red" data-id="2">♥</li>
+        <li data-type="suit" data-id="3">♣</li>
+        <li data-type="suit" style="color: red" data-id="4">♦</li>
+    </ul>
+    </div>
+</div>
+
+<div id="infobox">
+    <div id="gameinfo">
+    </div>
+</div>
 
 </div>
 
