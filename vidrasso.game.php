@@ -340,14 +340,13 @@ class Vidrasso extends Table {
         $this->deck->moveCard($card_id, 'cardsontable', $player_id);
         if (self::getGameStateValue('ledSuit') == 0)
             self::setGameStateValue('ledSuit', $current_card['type']);
-        self::notifyAllPlayers('playCard', clienttranslate('${player_name} plays the ${value_displayed} of ${color_displayed}'), [
-            'i18n' => ['color_displayed','value_displayed'],
+        self::notifyAllPlayers('playCard', clienttranslate('${player_name} plays the ${value} of ${suit_displayed}'), [
+            'i18n' => ['suit_displayed'],
             'card_id' => $card_id,'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
-            'value' => $current_card ['type_arg'],
-            'value_displayed' => $this->values_label[$current_card['type_arg']],
-            'color' => $current_card ['type'],
-            'color_displayed' => $this->suits[$current_card['type']]['name']]);
+            'value' => $current_card['type_arg'],
+            'suit' => $current_card['type'],
+            'suit_displayed' => $this->suits[$current_card['type']]['name']]);
         // Next player
         $this->gamestate->nextState('');
     }
@@ -488,13 +487,15 @@ class Vidrasso extends Table {
         // Note: we use 2 notifications here in order we can pause the display during the first notification
         //  before we move all cards to the winner (during the second)
         $players = self::loadPlayersBasicInfos();
+        $points = $cards_on_table[0]['type_arg'] + $cards_on_table[1]['type_arg'];
         self::notifyAllPlayers('trickWin', clienttranslate('${player_name} wins the trick and ${points} points'), [
             'player_id' => $winning_player,
             'player_name' => $players[$winning_player]['player_name'],
-            'points' => $cards_on_table[0]['type_arg'] + $cards_on_table[1]['type_arg'],
+            'points' => $points,
         ]);
         self::notifyAllPlayers('giveAllCardsToPlayer','', [
             'player_id' => $winning_player,
+            'points' => $points,
         ]);
 
         $this->gamestate->nextState('revealStrawmen');
@@ -554,15 +555,19 @@ class Vidrasso extends Table {
 
         // Apply scores to player
         foreach ($score_piles as $player_id => $score_pile) {
-            $gift_value = $gift_cards_by_player[$player_id]['type_arg'];
+            $gift_card = $gift_cards_by_player[$player_id]['type'];
+            $gift_value = $gift_card['type_arg'];
             $points = $score_pile['points'] + $gift_value;
             $sql = "UPDATE player SET player_score=player_score+$points  WHERE player_id='$player_id'";
             self::DbQuery($sql);
-            self::notifyAllPlayers('points', clienttranslate('${player_name} scores ${points} points (was gifted ${gift_value})'), [
+            self::notifyAllPlayers('endHand', clienttranslate('${player_name} scores ${points} points (was gifted ${gift_value} of ${gift_rank_name})'), [
+                'i18n' => ['gift_rank_name'],
                 'player_id' => $player_id,
-                'player_name' => $players [$player_id] ['player_name'],
+                'player_name' => $players[$player_id]['player_name'],
                 'points' => $points,
                 'gift_value' => $gift_value,
+                'gift_suit' => $gift_card['type'],
+                'gift_suit_name' => $this->suits[$gift_card['type']]['name'],
             ]);
         }
 

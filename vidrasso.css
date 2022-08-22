@@ -48,7 +48,8 @@
 /** Table layout **/
 
 #playertables {
-    float: left;
+    display: inline-block;
+    vertical-align: middle;
     height: 170px;
     margin-left: 30px;
 }
@@ -67,8 +68,8 @@
 
 #trumpSelector {
     height: 130px;
-    float: left;
-    display: block;
+    display: inline-block;
+    vertical-align: middle;
 }
 
 #trumpSelector > div {
@@ -76,13 +77,28 @@
     align-items: center
 }
 
-
 #trumpSelector > div > div {
     height: 1em;
     padding-top: 1em;
     padding-bottom: 1em;
-    margin-top: 1em;
-    margin-bottom: 1em;
+}
+
+#trumpSelector ul {
+    list-style-type: none;
+    overflow: hidden;
+}
+
+#trumpSelector li {
+    float: left;
+    padding: 8px;
+    outline: 1px solid black;
+    outline-offset: -2px;
+    height: 32px;
+    width: 32px;
+    font-size: 40px;
+    text-align: center;
+    line-height: 32px;
+    margin-right: 10px;
 }
 
 #rankSelector {
@@ -93,31 +109,15 @@
     display: none;
 }
 
-#trump_rank {
-    margin: 1em;
-    height: 1em;
-    width: 1em;
+.trump_indicator {
+    padding: 8px !important;
+    outline-offset: -2px;
+    height: 32px !important;
+    width: 32px !important;
+    font-size: 40px !important;
+    text-align: center;
+    line-height: 32px !important;
 }
-
-#trump_suit {
-    margin: 1em;
-    height: 1em;
-    width: 1em;
-}
-
-#infobox {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 180px;
-    height: 170px;
-}
-
-#gameinfo {
-    display: inline;
-    vertical-align: middle;
-}
-
 
 .playertablecard {
     display: inline-block;
@@ -125,6 +125,11 @@
     margin-top: 5px;
     width: 72px;
     height: 96px;
+}
+
+.playertable_info {
+    display: block;
+    width: auto;
 }
 
 .straw {
@@ -161,20 +166,4 @@
     height: 96px;
     background-image: url('img/cards.jpg');
     z-index: 2;
-}
-
-#trumpSelector ul {
-    list-style-type: none;
-    overflow: hidden;
-}
-
-#trumpSelector li {
-    float: left;
-    padding: 1em;
-    outline: 1px solid black;
-    outline-offset: -2px;
-    margin: 1em;
-    height: 1em;
-    width: 1em;
-    text-align: center;
 }

@@ -95,10 +95,17 @@ function (dojo, declare) {
             // Mapping between strawmen card IDs and elements
             this.strawmenById = {};
 
+            this.scorePiles = {};
 
             // Strawmen
             for (const [player_id, player_info] of Object.entries(this.gamedatas.players)) {
-                // FIXME
+                // Score piles
+                let score_pile_counter = new ebg.counter();
+                this.scorePiles[player_id] = score_pile_counter;
+                score_pile_counter.create(`score_pile_${player_id}`);
+                score_pile_counter.setValue(player_info.score_pile);
+
+                // FIXME - .... why FIXME? Why is this here?
                 if (!document.getElementById(`playerstraw_${player_id}_1`)) continue;
 
                 for (const [ix, straw] of player_info.visible_strawmen.entries()) {
@@ -137,7 +144,7 @@ function (dojo, declare) {
 
             // Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
-            
+
             this.ensureSpecificImageLoading(['../common/point.png']);
         },
 
@@ -176,7 +183,7 @@ function (dojo, declare) {
             case 'selectTrump':
                 document.getElementById('rankSelector').style.display = 'none';
                 document.getElementById('suitSelector').style.display = 'none';
-                document.getElementById('playertables').style.display = 'block';
+                document.getElementById('playertables').style.display = 'inline-block';
                 break;
 
             case 'dummmy':
@@ -405,12 +412,21 @@ function (dojo, declare) {
             dojo.subscribe('trickWin', this, 'notif_trickWin');
             this.notifqueue.setSynchronous('trickWin', 1000);
             dojo.subscribe('giveAllCardsToPlayer', this, 'notif_giveAllCardsToPlayer');
+
+            dojo.subscribe('endHand', this, 'notif_endHand');
+            this.notifqueue.setSynchronous('endHand', 1000);
+
             dojo.subscribe('newScores', this, 'notif_newScores');
         },
 
         notif_newHand: function(notif) {
-            document.getElementById('trump_rank').textContent = '';
-            document.getElementById('trump_suit').textContent = '';
+            document.getElementById('trump_rank').style.display = 'none';
+            document.getElementById('trump_suit').style.display = 'none';
+
+            // Reset scores
+            for (let scorePile of Object.values(this.scorePiles)) {
+                scorePile.setValue(0);
+            }
 
             // We received a new full hand of 13 cards.
             this.playerHand.removeAll();
@@ -427,7 +443,14 @@ function (dojo, declare) {
             this.gamedatas.trumpRank = notif.args.rank;
             let elem = document.getElementById('trump_rank');
             elem.textContent = notif.args.rank;
+            elem.style.display = 'block';
             document.getElementById('rankSelector').style.display = 'none';
+
+            elem = document.getElementById('trump_suit');
+            if (elem.style.display == 'none') {
+                elem.textContent = '?';
+                elem.style.display = 'block';
+            }
         },
 
         notif_selectTrumpSuit: function(notif) {
@@ -436,7 +459,14 @@ function (dojo, declare) {
             let suit = this.suitSymbols[notif.args.suit_id];
             elem.textContent = suit.text;
             elem.style.color = suit.color;
+            elem.style.display = 'block';
             document.getElementById('suitSelector').style.display = 'none';
+
+            elem = document.getElementById('trump_rank');
+            if (elem.style.display == 'none') {
+                elem.textContent = '?';
+                elem.style.display = 'block';
+            }
         },
 
         notif_giftCard: function(notif) {
@@ -445,7 +475,7 @@ function (dojo, declare) {
 
         notif_playCard: function(notif) {
             // Play a card on the table
-            this.playCardOnTable(notif.args.player_id, notif.args.color, notif.args.value, notif.args.card_id);
+            this.playCardOnTable(notif.args.player_id, notif.args.suit, notif.args.value, notif.args.card_id);
         },
 
         notif_revealStrawmen: function(notif) {
@@ -464,24 +494,31 @@ function (dojo, declare) {
             }
         },
 
-        notif_trickWin: function(notif) {
-            // We do nothing here (just wait in order players can view the 4 cards played before they're gone.
+        notif_endHand: function(notif) {
+            // TODO: Animate gifted card
+            this.scorePiles[notif.args.player_id].incValue(notif.args.gift_value);
         },
 
         notif_giveAllCardsToPlayer: function(notif) {
             // Move all cards on table to given table, then destroy them
-            var winner_id = notif.args.player_id;
-            for (var player_id in this.gamedatas.players) {
-                var anim = this.slideToObject('cardontable_' + player_id, 'cardontable_' + winner_id);
+            let winner_id = notif.args.player_id;
+            for (let player_id in this.gamedatas.players) {
+                let anim = this.slideToObject('cardontable_' + player_id, 'cardontable_' + winner_id);
                 dojo.connect(anim, 'onEnd', (node) => {
                     dojo.destroy(node);
                 });
                 anim.play();
             }
+            this.scorePiles[winner_id].incValue(notif.args.points);
         },
+
+        notif_endHand: function(notif) {
+            // We do nothing here (just wait in order players can view the 4 cards played before they're gone.
+        },
+
         notif_newScores: function(notif) {
             // Update players' scores
-            for (var player_id in notif.args.newScores) {
+            for (let player_id in notif.args.newScores) {
                 this.scoreCtrl[player_id].toValue(notif.args.newScores[player_id]);
             }
         },

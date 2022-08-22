@@ -45,8 +45,11 @@
         <div class="playertablename" style="color:#{PLAYER_COLOR}">
             {PLAYER_NAME}
         </div>
-        <div class="playertablecard" id="playertablecard_{PLAYER_ID}">
-        </div>
+        <div class="playertablecard" id="playertablecard_{PLAYER_ID}"></div>
+        <span class="playertable_info">
+            <span class="">Score pile: </span>
+            <span id="score_pile_{PLAYER_ID}"></span>
+        </span>
     </div>
     <!-- END player -->
 
@@ -55,7 +58,7 @@
 <div id="trumpSelector">
     <div>
     <div>Trump rank:</div>
-    <div id="trump_rank"></div>
+    <div id="trump_rank" class="trump_indicator"></div>
     <ul id="rankSelector">
         <li data-type="rank" data-id="1">1</li>
         <li data-type="rank" data-id="2">2</li>
@@ -68,20 +71,16 @@
         <li data-type="rank" data-id="9">9</li>
     </ul>
     </div>
+    <br>
     <div>
     <div>Trump suit:</div>
-    <div id="trump_suit"></div>
+    <div id="trump_suit" class="trump_indicator"></div>
     <ul id="suitSelector">
         <li data-type="suit" data-id="1">♠</li>
         <li data-type="suit" style="color: red" data-id="2">♥</li>
         <li data-type="suit" data-id="3">♣</li>
         <li data-type="suit" style="color: red" data-id="4">♦</li>
     </ul>
-    </div>
-</div>
-
-<div id="infobox">
-    <div id="gameinfo">
     </div>
 </div>
 
