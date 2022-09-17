@@ -27,8 +27,6 @@ define([
 function (dojo, declare) {
     return declare('bgagame.vidrasso', ebg.core.gamegui, {
         constructor: function(){
-            console.log('vidrasso constructor');
-
             this.cardWidth = 72;
             this.cardHeight = 96;
 
@@ -55,8 +53,13 @@ function (dojo, declare) {
 
 
         setup: function(gamedatas) {
-            console.log('Starting game setup');
             console.log('gamedatas', gamedatas);
+
+            // Set dynamic UI strings
+            let opponent = gamedatas.players[gamedatas.opponent_id];
+            document.querySelector('#opstrawmen_wrap > h3').innerHTML = dojo.string.substitute(
+                _("${player_name}'s strawmen"),
+                {player_name: `<span style="color:#${opponent.color}">${opponent.name}</span>`});
 
             // Player hand
             this.playerHand = new ebg.stock();
@@ -70,10 +73,6 @@ function (dojo, declare) {
                 dojo.connect(node, 'onclick', this, 'onChoosingTrump');
             });
 
-            dojo.query('#mystrawmen .straw').forEach((node, index, arr) => {
-                dojo.connect(node, 'onclick', this, 'onChoosingStrawman');
-            });
-
             // Create cards types
             for (let suit = 1; suit <= 4; suit++) {
                 for (let rank = 1; rank <= 9; rank++) {
@@ -83,21 +82,18 @@ function (dojo, declare) {
                 }
             }
 
+            // Mapping of card ids to elements
+            // Include both cards in hand and strawmen
+            this.playerCards = {};
 
             // Cards in player's hand
-            for (var i in this.gamedatas.hand) {
-                var card = this.gamedatas.hand[i];
-                var color = card.type;
-                var value = card.type_arg;
-                this.playerHand.addToStockWithId(this.getCardUniqueId(color, value), card.id);
-            }
+            this.initPlayerHand(this.gamedatas.hand);
 
             // Mapping between strawmen card IDs and elements
             this.strawmenById = {};
 
             this.scorePiles = {};
 
-            // Strawmen
             for (const [player_id, player_info] of Object.entries(this.gamedatas.players)) {
                 // Score piles
                 let score_pile_counter = new ebg.counter();
@@ -105,18 +101,8 @@ function (dojo, declare) {
                 score_pile_counter.create(`score_pile_${player_id}`);
                 score_pile_counter.setValue(player_info.score_pile);
 
-                // FIXME - .... why FIXME? Why is this here?
-                if (!document.getElementById(`playerstraw_${player_id}_1`)) continue;
-
-                for (const [ix, straw] of player_info.visible_strawmen.entries()) {
-                    if (!straw) continue;
-                    this.setStrawman(player_id, ix + 1, straw.type, straw.type_arg, straw.id);
-                    if (player_info.more_strawmen[ix]) {
-                        let more = document.createElement('div')
-                        more.className = 'straw_more'
-                        document.getElementById(`straw_${player_id}_${ix+1}`).parentNode.appendChild(more);
-                    }
-                }
+                // Strawmen
+                this.initStrawmen(player_id, player_info.visible_strawmen, player_info.more_strawmen);
             }
 
             // Cards played on table
@@ -126,6 +112,7 @@ function (dojo, declare) {
                 var value = card.type_arg;
                 var player_id = card.location_arg;
                 this.playCardOnTable(player_id, color, value, card.id);
+                this.ledCard = card.id; // There can only be one card on the table
             }
 
             if (this.gamedatas.trumpRank != "0") {
@@ -156,14 +143,60 @@ function (dojo, declare) {
         //
         onEnteringState: function(stateName, args)
         {
-            console.log('Entering state: '+stateName);
+            console.log('Entering state:', stateName);
 
             switch (stateName) {
             case 'selectTrump':
-                if(this.isCurrentPlayerActive()) {
+                if (this.isCurrentPlayerActive()) {
                     document.getElementById('playertables').style.display = 'none';
-                    document.getElementById('rankSelector').style.display = (this.gamedatas.trumpRank == "0") ? 'inline-block' : 'none';
-                    document.getElementById('suitSelector').style.display = (this.gamedatas.trumpSuit == "0") ? 'inline-block' : 'none';
+                    document.getElementById('rankSelector').style.display = (this.gamedatas.trumpRank == '0') ? 'inline-block' : 'none';
+                    document.getElementById('suitSelector').style.display = (this.gamedatas.trumpSuit == '0') ? 'inline-block' : 'none';
+                }
+                break;
+
+            // Mark hand cards
+            case 'giftCard':
+                document.querySelectorAll('#myhand .stockitem').forEach(
+                    e => e.classList.add('playable'));
+                break;
+
+            // Mark playable cards
+            case 'playerTurn':
+                if (!this.isCurrentPlayerActive()) {
+                    document.querySelectorAll('#mystrawmen .playable, #myhand .playable').forEach(
+                        e => e.classList.remove('playable'));
+                    break;
+                }
+                let player_name = this.gamedatas.players[this.player_id].name;
+                if (this.ledCard) {
+                    let led_card_info = this.gamedatas.card_info[this.ledCard];
+
+                    // Player is following
+                    let cards_of_led_suit = [];
+                    let cards_of_led_suit_and_trumps = [];
+                    for (let card_id in this.playerCards) {
+                        let card_elem = this.playerCards[card_id];
+                        let card_info = this.gamedatas.card_info[card_id];
+                        if (card_info.suit == led_card_info.suit) {
+                            cards_of_led_suit.push(card_elem);
+                            cards_of_led_suit_and_trumps.push(card_elem);
+                        } else if (card_info.suit == this.gamedatas.trumpSuit || card_info.rank == this.gamedatas.trumpRank) {
+                            cards_of_led_suit_and_trumps.push(card_elem);
+                        }
+                    }
+
+                    if (cards_of_led_suit.length == 0) {
+                        // Player can play any card
+                        document.querySelectorAll('#mystrawmen .strawcard, #myhand .stockitem').forEach(
+                            e => e.classList.add('playable'));
+                    } else {
+                        // Player must follow suit or trump
+                        cards_of_led_suit_and_trumps.forEach(e => e.classList.add('playable'))
+                    }
+                } else {
+                    // Player is leading, highlight all cards
+                    document.querySelectorAll('#mystrawmen .strawcard, #myhand .stockitem').forEach(
+                        e => e.classList.add('playable'));
                 }
                 break;
 
@@ -177,13 +210,18 @@ function (dojo, declare) {
         //
         onLeavingState: function(stateName)
         {
-            console.log('Leaving state: '+stateName);
-
             switch (stateName) {
             case 'selectTrump':
                 document.getElementById('rankSelector').style.display = 'none';
                 document.getElementById('suitSelector').style.display = 'none';
                 document.getElementById('playertables').style.display = 'inline-block';
+                break;
+
+            // Unmark playable cards
+            case 'giftCard':
+            case 'playerTurn':
+                document.querySelectorAll('#mystrawmen .playable, #myhand .playable').forEach(
+                    e => e.classList.remove('playable'));
                 break;
 
             case 'dummmy':
@@ -196,8 +234,6 @@ function (dojo, declare) {
         //
         onUpdateActionButtons: function(stateName, args)
         {
-            console.log('onUpdateActionButtons: '+stateName);
-
             if(this.isCurrentPlayerActive())
             {
                 switch(stateName)
@@ -267,28 +303,54 @@ function (dojo, declare) {
             }
         },
 
+        initPlayerHand: function(card_list) {
+            for (let i in card_list) {
+                let card = card_list[i];
+                let suit = card.type;
+                let rank = card.type_arg;
+                this.playerHand.addToStockWithId(this.getCardUniqueId(suit, rank), card.id);
+                this.playerCards[card.id] = document.getElementById(this.playerHand.getItemDivId(card.id));
+            }
+        },
+
+        initStrawmen: function(player_id, visible_strawmen, more_strawmen) {
+            for (const [ix, straw] of visible_strawmen.entries()) {
+                if (!straw) continue;
+                this.setStrawman(player_id, ix + 1, straw.type, straw.type_arg, straw.id);
+                if (!more_strawmen || more_strawmen[ix]) {
+                    let more = document.createElement('div');
+                    more.className = 'straw_more';
+                    document.getElementById(`straw_${player_id}_${ix+1}`).parentNode.appendChild(more);
+                }
+            }
+        },
+
         setStrawman: function(player_id, straw_num, suit, rank, card_id) {
             let spriteCoords = this.getCardSpriteXY(suit, rank);
             let elem = document.getElementById(`playerstraw_${player_id}_${straw_num}`);
-            elem.dataset.id = card_id;
-            dojo.place(this.format_block('jstpl_strawman', {
+            let newElem = dojo.place(this.format_block('jstpl_strawman', {
                 x: spriteCoords.x,
                 y: spriteCoords.y,
                 player_id: player_id,
                 straw_num: straw_num,
             }), elem);
-            let newElem = elem.querySelector('.strawcard');
+            newElem.dataset.card_id = card_id;
             this.strawmenById[card_id] = newElem;
+            if (player_id == this.player_id) {
+                dojo.connect(newElem, 'onclick', this, 'onChoosingStrawman');
+                this.playerCards[card_id] = newElem;
+            }
             return newElem;
         },
 
         playCardOnTable: function(player_id, suit, rank, card_id) {
             let spriteCoords = this.getCardSpriteXY(suit, rank);
-            dojo.place(this.format_block('jstpl_cardontable', {
+            let placedCard = dojo.place(this.format_block('jstpl_cardontable', {
                 x : spriteCoords.x,
                 y : spriteCoords.y,
                 player_id : player_id
             }), 'playertablecard_' + player_id);
+            placedCard.dataset.card_id = card_id;
 
             let strawElem = this.strawmenById[card_id];
             if (strawElem) {
@@ -307,6 +369,7 @@ function (dojo, declare) {
                         this.placeOnObject('cardontable_' + player_id, 'myhand_item_' + card_id);
                         this.playerHand.removeFromStockById(card_id);
                     }
+                    delete this.playerCards[card_id];
                 }
             }
 
@@ -327,23 +390,27 @@ function (dojo, declare) {
 
         onPlayerHandSelectionChanged: function() {
             var items = this.playerHand.getSelectedItems();
+            if (items.length == 0)
+                return
+            this.playerHand.unselectAll();
+            if (!document.getElementById(this.playerHand.getItemDivId(items[0].id)).classList.contains('playable')) {
+                return;
+            }
 
-            if (items.length > 0) {
-                if (this.checkAction('playCard', true)) {
-                    var card_id = items[0].id;
-                    this.ajaxAction('playCard', {
-                        id: card_id,
-                        lock: true
-                    });
-                } else if (this.checkAction('giftCard')) {
-                    var card_id = items[0].id;
-                    this.ajaxAction('giftCard', {
-                        id: card_id,
-                        lock: true
-                    });
-                } else {
-                    this.playerHand.unselectAll();
-                }
+            if (this.checkAction('playCard', true)) {
+                var card_id = items[0].id;
+                this.ajaxAction('playCard', {
+                    id: card_id,
+                    lock: true
+                });
+            } else if (this.checkAction('giftCard')) {
+                var card_id = items[0].id;
+                this.ajaxAction('giftCard', {
+                    id: card_id,
+                    lock: true
+                });
+            } else {
+                this.playerHand.unselectAll();
             }
         },
 
@@ -351,7 +418,10 @@ function (dojo, declare) {
             if (!this.checkAction('playCard', true))
                 return;
 
-            let card_id = event.currentTarget.dataset.id;
+            if (!event.currentTarget.classList.contains('playable'))
+                return;
+
+            let card_id = event.currentTarget.dataset.card_id;
             if (!card_id)
                 return;
 
@@ -403,6 +473,7 @@ function (dojo, declare) {
             console.log('notifications subscriptions setup');
 
             dojo.subscribe('newHand', this, 'notif_newHand');
+            dojo.subscribe('newHandPublic', this, 'notif_newHandPublic');
             dojo.subscribe('selectTrumpRank', this, 'notif_selectTrumpRank');
             dojo.subscribe('selectTrumpSuit', this, 'notif_selectTrumpSuit');
             dojo.subscribe('giftCard', this, 'notif_giftCard');
@@ -420,8 +491,10 @@ function (dojo, declare) {
         },
 
         notif_newHand: function(notif) {
-            document.getElementById('trump_rank').style.display = 'none';
-            document.getElementById('trump_suit').style.display = 'none';
+            document.getElementById('trump_rank').textContent = '';
+            document.getElementById('trump_suit').textContent = '';
+            this.gamedatas.trumpRank = '0';
+            this.gamedatas.trumpSuit = '0';
 
             // Reset scores
             for (let scorePile of Object.values(this.scorePiles)) {
@@ -430,12 +503,14 @@ function (dojo, declare) {
 
             // We received a new full hand of 13 cards.
             this.playerHand.removeAll();
+            this.playerCards = {};
 
-            for (var i in notif.args.cards) {
-                var card = notif.args.cards[i];
-                var color = card.type;
-                var value = card.type_arg;
-                this.playerHand.addToStockWithId(this.getCardUniqueId(color, value), card.id);
+            this.initPlayerHand(notif.args.hand_cards);
+        },
+
+        notif_newHandPublic: function(notif) {
+            for (let player_id in notif.args.strawmen) {
+                this.initStrawmen(player_id, notif.args.strawmen[player_id]);
             }
         },
 
@@ -471,9 +546,13 @@ function (dojo, declare) {
 
         notif_giftCard: function(notif) {
             this.playerHand.removeFromStockById(notif.args.card);
+            delete this.playerCards[notif.args.card];
         },
 
         notif_playCard: function(notif) {
+            if (notif.args.led_card) {
+                this.ledCard = notif.args.card_id;
+            }
             // Play a card on the table
             this.playCardOnTable(notif.args.player_id, notif.args.suit, notif.args.value, notif.args.card_id);
         },
@@ -494,9 +573,8 @@ function (dojo, declare) {
             }
         },
 
-        notif_endHand: function(notif) {
-            // TODO: Animate gifted card
-            this.scorePiles[notif.args.player_id].incValue(notif.args.gift_value);
+        notif_trickWin: function(notif) {
+             // We do nothing here (just wait in order players can view the cards played before they're gone
         },
 
         notif_giveAllCardsToPlayer: function(notif) {
@@ -510,10 +588,12 @@ function (dojo, declare) {
                 anim.play();
             }
             this.scorePiles[winner_id].incValue(notif.args.points);
+            this.ledCard = null;
         },
 
         notif_endHand: function(notif) {
-            // We do nothing here (just wait in order players can view the 4 cards played before they're gone.
+            // TODO: Animate gifted card
+            this.scorePiles[notif.args.player_id].incValue(notif.args.gift_value);
         },
 
         notif_newScores: function(notif) {

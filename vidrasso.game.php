@@ -150,12 +150,18 @@ class Vidrasso extends Table {
 
         foreach ($result['players'] as &$player) {
             $player_id = $player['id'];
+            if ($player_id != $current_player_id) {
+                $result['opponent_id'] = $player_id;
+            }
             $strawmen = $this->getPlayerStrawmen($player_id);
             $player['visible_strawmen'] = $strawmen['visible'];
             $player['more_strawmen'] = $strawmen['more'];
             $player['tricks_won'] = $score_piles[$player_id]['tricks_won'];
             $player['score_pile'] = $score_piles[$player_id]['points'];
         }
+
+        // TODO: Query from card DB once at the top of the function?
+        $result['card_info'] = self::getCollectionFromDb('SELECT card_id id, card_type suit, card_type_arg rank FROM card');
 
         return $result;
     }
@@ -244,15 +250,12 @@ class Vidrasso extends Table {
     function selectTrump($trump_type, $trump_id) {
         self::checkAction('selectTrump');
         $player_id = self::getActivePlayerId();
-        $first_picker_player = self::getGameStateValue('firstPicker');
-        $trump_suit = $this->getGameStateValue('trumpSuit');
         $trump_rank = $this->getGameStateValue('trumpRank');
+        $trump_suit = $this->getGameStateValue('trumpSuit');
 
-        // Make sure the second picker is allowed to pick this trump
-        if ($first_picker_player != $player_id) {
-            if ($trump_rank && $trump_type == 'rank' || $trump_suit && $trump_type == 'suit' ) {
-                throw new BgaUserException(self::_('You cannot choose this trump type'));
-            }
+        // Make sure this trump type is not already set
+        if ($trump_rank && $trump_type == 'rank' || $trump_suit && $trump_type == 'suit') {
+            throw new BgaUserException(self::_('You cannot choose this trump type'));
         }
 
         $players = self::loadPlayersBasicInfos();
@@ -273,10 +276,10 @@ class Vidrasso extends Table {
             ]);
         }
 
-        if ($first_picker_player == $player_id) {
-            $this->gamestate->nextState('selectOtherTrump');
-        } else {
+        if ($trump_rank || $trump_suit) {
             $this->gamestate->nextState('giftCard');
+        } else {
+            $this->gamestate->nextState('selectOtherTrump');
         }
     }
 
@@ -318,7 +321,8 @@ class Vidrasso extends Table {
         // If this is a followed card, make sure it's in the led suit or a trump suit/rank.
         // If not, make sure the player has no cards of the led suit.
         $led_suit = self::getGameStateValue('ledSuit');
-        if (intval($this->deck->countCardInLocation('cardsontable')) > 0) {
+        $table_is_empty = intval($this->deck->countCardInLocation('cardsontable')) == 0;
+        if (!$table_is_empty) {
             $trump_rank = $this->getGameStateValue('trumpRank');
             $trump_suit = $this->getGameStateValue('trumpSuit');
             if ($current_card['type'] != $led_suit && $current_card['type'] != $trump_suit && $current_card['type_arg'] != $trump_rank) {
@@ -344,6 +348,7 @@ class Vidrasso extends Table {
             'i18n' => ['suit_displayed'],
             'card_id' => $card_id,'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
+            'led_card' => $table_is_empty,
             'value' => $current_card['type_arg'],
             'suit' => $current_card['type'],
             'suit_displayed' => $this->suits[$current_card['type']]['name']]);
@@ -428,7 +433,6 @@ class Vidrasso extends Table {
     }
 
     function stFirstTrick() {
-        // New trick: active the player who wins the last trick, or the player who own the club-2 card
         $this->gamestate->changeActivePlayer($this->getGameStateValue('firstPlayer'));
         $this->gamestate->nextState();
     }
@@ -551,17 +555,17 @@ class Vidrasso extends Table {
 
         $score_piles = $this->getScorePiles();
 
-        $gift_cards_by_player = self::getCollectionFromDB('select card_location_arg id, card_type_arg type_arg from card where card_location = "gift"');
+        $gift_cards_by_player = self::getCollectionFromDB('select card_location_arg id, card_type type, card_type_arg type_arg from card where card_location = "gift"');
 
         // Apply scores to player
         foreach ($score_piles as $player_id => $score_pile) {
-            $gift_card = $gift_cards_by_player[$player_id]['type'];
+            $gift_card = $gift_cards_by_player[$player_id];
             $gift_value = $gift_card['type_arg'];
             $points = $score_pile['points'] + $gift_value;
             $sql = "UPDATE player SET player_score=player_score+$points  WHERE player_id='$player_id'";
             self::DbQuery($sql);
-            self::notifyAllPlayers('endHand', clienttranslate('${player_name} scores ${points} points (was gifted ${gift_value} of ${gift_rank_name})'), [
-                'i18n' => ['gift_rank_name'],
+            self::notifyAllPlayers('endHand', clienttranslate('${player_name} scores ${points} points (was gifted ${gift_value} of ${gift_suit_name})'), [
+                'i18n' => ['gift_suit_name'],
                 'player_id' => $player_id,
                 'player_name' => $players[$player_id]['player_name'],
                 'points' => $points,
@@ -591,18 +595,19 @@ class Vidrasso extends Table {
         $flat_scores = array_values($new_scores);
         if ($flat_scores[0] == $flat_scores[1]) {
             // Rare case when players are tied: Alternate first picker
-            self::setGameStateValue('firstPicker', 
-                self::getPlayerAfter(self::getGameStateValue('firstPicker')));
+            $first_picker = self::getPlayerAfter(self::getGameStateValue('firstPicker'));
         } else {
             // First picker is the player with the lower score
             if ($flat_scores[0] < $flat_scores[1]) {
-                $player_with_lowest_score = array_keys($flat_scores)[0];
+                $player_with_lowest_score = array_keys($new_scores)[0];
             } else {
-                $player_with_lowest_score = array_keys($flat_scores)[1];
+                $player_with_lowest_score = array_keys($new_scores)[1];
             }
-            self::setGameStateValue('firstPicker', $player_with_lowest_score);
+            $first_picker = $player_with_lowest_score;
         }
 
+        self::setGameStateValue('firstPicker', $first_picker);
+        $this->gamestate->changeActivePlayer($first_picker);
         self::notifyAllPlayers('newScores', '', ['newScores' => $new_scores]);
 
         $this->gamestate->nextState('nextHand');

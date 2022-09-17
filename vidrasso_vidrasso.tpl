@@ -26,7 +26,7 @@
 -->
 
 <div id="opstrawmen_wrap" class="whiteblock">
-    <h3>{OP_STRAWMEN}</h3>
+    <h3>Opponent's strawmen</h3>
     <div id="opstrawmen">
         <div class="straw" id="playerstraw_{OP_PLAYER_ID}_1"></div>
         <div class="straw" id="playerstraw_{OP_PLAYER_ID}_2"></div>
@@ -55,7 +55,7 @@
 
 </div>
 
-<div id="trumpSelector">
+<div id="trumpSelector" class="whiteblock">
     <div>
     <div>Trump rank:</div>
     <div id="trump_rank" class="trump_indicator"></div>

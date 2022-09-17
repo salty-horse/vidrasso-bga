@@ -57,7 +57,6 @@ class view_vidrasso_vidrasso extends game_view {
         $this->tpl['MY_PLAYER_ID'] = $current_player_id;
         $this->tpl['MY_HAND'] = self::_('My hand');
         $this->tpl['MY_STRAWMEN'] = self::_('My strawmen');
-        $this->tpl['OP_STRAWMEN'] = self::_("Opponent's strawmen");
       /*********** Do not change anything below this line  ************/
     }
 }

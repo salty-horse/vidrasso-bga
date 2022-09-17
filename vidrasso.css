@@ -99,6 +99,8 @@
     text-align: center;
     line-height: 32px;
     margin-right: 10px;
+    user-select: none;
+    cursor: pointer;
 }
 
 #rankSelector {
@@ -143,12 +145,18 @@
 }
 
 .strawcard {
-    cursor: pointer;
     position: absolute;
     width: 72px;
     height: 96px;
     background-image: url('img/cards.jpg');
     z-index: 1;
+}
+
+.stockitem {
+    cursor: default !important;
+}
+.playable {
+    cursor: pointer !important;
 }
 
 .straw_more {
@@ -166,4 +174,8 @@
     height: 96px;
     background-image: url('img/cards.jpg');
     z-index: 2;
+}
+
+.playable {
+    box-shadow: 0px 0px 2px 2px yellow;
 }
