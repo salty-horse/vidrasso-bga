@@ -118,7 +118,7 @@ $gameinfos = [
 //  http://en.doc.boardgamearena.com/Game_meta-information:_gameinfos.inc.php
 //  IMPORTANT: this list should be ORDERED, with the most important tag first.
 //  IMPORTANT: it is mandatory that the FIRST tag is 1, 2, 3 and 4 (= game category)
-'tags' => [ 4, 11, 30, 200, 204 ],
+'tags' => [ 1, 2, 11, 30, 220 ],
 
 
 //////// BGA SANDBOX ONLY PARAMETERS (DO NOT MODIFY)
