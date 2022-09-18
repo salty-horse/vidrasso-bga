@@ -93,6 +93,7 @@ function (dojo, declare) {
             this.strawmenById = {};
 
             this.scorePiles = {};
+            this.handSizes = {};
 
             for (const [player_id, player_info] of Object.entries(this.gamedatas.players)) {
                 // Score piles
@@ -100,6 +101,14 @@ function (dojo, declare) {
                 this.scorePiles[player_id] = score_pile_counter;
                 score_pile_counter.create(`score_pile_${player_id}`);
                 score_pile_counter.setValue(player_info.score_pile);
+
+                // Hand size counter
+                dojo.place(this.format_block('jstpl_player_hand_size', player_info),
+                    document.getElementById(`player_board_${player_id}`));
+                let hand_size_counter = new ebg.counter();
+                this.handSizes[player_id] = hand_size_counter;
+                hand_size_counter.create(`player_hand_size_${player_id}`);
+                hand_size_counter.setValue(player_info.hand_size);
 
                 // Strawmen
                 this.initStrawmen(player_id, player_info.visible_strawmen, player_info.more_strawmen);
@@ -371,6 +380,7 @@ function (dojo, declare) {
                     }
                     delete this.playerCards[card_id];
                 }
+                this.handSizes[player_id].incValue(-1);
             }
 
             // In any case: move it to its final destination
@@ -496,9 +506,13 @@ function (dojo, declare) {
             this.gamedatas.trumpRank = '0';
             this.gamedatas.trumpSuit = '0';
 
-            // Reset scores
+            // Reset scores and hand size
             for (let scorePile of Object.values(this.scorePiles)) {
                 scorePile.setValue(0);
+            }
+
+            for (let handSize of Object.values(this.handSizes)) {
+                handSize.setValue(notif.args.hand_cards.length);
             }
 
             // We received a new full hand of 13 cards.
@@ -547,6 +561,11 @@ function (dojo, declare) {
         notif_giftCard: function(notif) {
             this.playerHand.removeFromStockById(notif.args.card);
             delete this.playerCards[notif.args.card];
+
+            // Decrease hand size of both players, even though one of them may still be thinking
+            for (let handSize of Object.values(this.handSizes)) {
+                handSize.incValue(-1);
+            }
         },
 
         notif_playCard: function(notif) {

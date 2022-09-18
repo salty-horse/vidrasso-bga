@@ -135,8 +135,6 @@ class Vidrasso extends Table {
         // Cards in player hand
         $result['hand'] = $this->deck->getCardsInLocation('hand', $current_player_id);
 
-        // TODO: Hand size of opponent
-
         // Cards played on the table
         $result['cardsontable'] = $this->deck->getCardsInLocation('cardsontable');
 
@@ -158,6 +156,7 @@ class Vidrasso extends Table {
             $player['more_strawmen'] = $strawmen['more'];
             $player['tricks_won'] = $score_piles[$player_id]['tricks_won'];
             $player['score_pile'] = $score_piles[$player_id]['points'];
+            $player['hand_size'] = $this->deck->countCardInLocation('hand', $player_id);
         }
 
         // TODO: Query from card DB once at the top of the function?
