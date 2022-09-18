@@ -191,7 +191,7 @@ class Vidrasso extends Table {
         for ($i = 1; $i <= 5; $i++) {
             $straw_cards = array_values($this->deck->getCardsInLocation("straw_{$i}_{$player_id}"));
             if (count($straw_cards) >= 1) {
-                array_push($visible_strawmen, $straw_cards[0]);
+                array_push($visible_strawmen, $this->getTopStraw($straw_cards));
                 array_push($hidden_strawmen, count($straw_cards) == 2);
             } else {
                 array_push($visible_strawmen, null);
@@ -203,6 +203,19 @@ class Vidrasso extends Table {
             'visible' => $visible_strawmen,
             'more' => $hidden_strawmen,
         ];
+    }
+
+    // Returns the strawman with highest location_arg
+    function getTopStraw($strawmen_list) {
+        return array_reduce($strawmen_list, function($max, $item) {
+            if (is_null($max)) {
+                return $item;
+            } else if ($item['location_arg'] > $max['location_arg']) {
+                return $item;
+            } else {
+                return $max;
+            }
+        });
     }
 
     function getCardStrength($card, $trump_suit, $led_suit) {
@@ -400,20 +413,13 @@ class Vidrasso extends Table {
         $public_strawmen = [];
         foreach ($players as $player_id => $player) {
             $hand_cards = $this->deck->pickCards(8, 'deck', $player_id);
-            $straw1 = $this->deck->pickCardsForLocation(2, 'deck', "straw_1_{$player_id}");
-            $straw2 = $this->deck->pickCardsForLocation(2, 'deck', "straw_2_{$player_id}");
-            $straw3 = $this->deck->pickCardsForLocation(2, 'deck', "straw_3_{$player_id}");
-            $straw4 = $this->deck->pickCardsForLocation(2, 'deck', "straw_4_{$player_id}");
-            $straw5 = $this->deck->pickCardsForLocation(2, 'deck', "straw_5_{$player_id}");
-
-            // TODO: Check that the first card is always first in the response
-            $public_strawmen[$player_id] = [
-                array_values($straw1)[0],
-                array_values($straw2)[0],
-                array_values($straw3)[0],
-                array_values($straw4)[0],
-                array_values($straw5)[0],
-            ];
+            $player_strawmen = [];
+            for ($i = 1; $i <= 5; $i++) {
+                $this->deck->pickCardForLocation('deck', "straw_${i}_{$player_id}", 0);
+                $straw = $this->deck->pickCardForLocation('deck', "straw_${i}_{$player_id}", 1);
+                array_push($player_strawmen, $straw);
+            }
+            $public_strawmen[$player_id] = $player_strawmen;
 
             self::notifyPlayer($player_id, 'newHand', '', ['hand_cards' => $hand_cards]);
         }
