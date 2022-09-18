@@ -176,7 +176,6 @@ function (dojo, declare) {
                         e => e.classList.remove('playable'));
                     break;
                 }
-                let player_name = this.gamedatas.players[this.player_id].name;
                 if (this.ledCard) {
                     let led_card_info = this.gamedatas.card_info[this.ledCard];
 
@@ -378,7 +377,6 @@ function (dojo, declare) {
                         this.placeOnObject('cardontable_' + player_id, 'myhand_item_' + card_id);
                         this.playerHand.removeFromStockById(card_id);
                     }
-                    delete this.playerCards[card_id];
                 }
                 this.handSizes[player_id].incValue(-1);
             }
@@ -574,6 +572,9 @@ function (dojo, declare) {
             }
             // Play a card on the table
             this.playCardOnTable(notif.args.player_id, notif.args.suit, notif.args.value, notif.args.card_id);
+
+            // This does nothing if it's the opponent's card
+            delete this.playerCards[notif.args.card_id];
         },
 
         notif_revealStrawmen: function(notif) {
