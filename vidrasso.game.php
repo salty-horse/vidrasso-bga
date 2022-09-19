@@ -581,6 +581,7 @@ class Vidrasso extends Table {
         }
 
         $new_scores = self::getCollectionFromDb('SELECT player_id, player_score FROM player', true);
+        self::notifyAllPlayers('newScores', '', ['newScores' => $new_scores]);
 
         // Check if this is the end of the game
         $target_points = $this->getGameStateValue('targetPoints');
@@ -613,8 +614,6 @@ class Vidrasso extends Table {
 
         self::setGameStateValue('firstPicker', $first_picker);
         $this->gamestate->changeActivePlayer($first_picker);
-        self::notifyAllPlayers('newScores', '', ['newScores' => $new_scores]);
-
         $this->gamestate->nextState('nextHand');
     }
 
