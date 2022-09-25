@@ -82,6 +82,7 @@ $machinestates = [
         'description' => '',
         'type' => 'game',
         'action' => 'stNewHand',
+        'updateGameProgression' => true,
         'transitions' => ['' => STATE_SELECT_TRUMP]
     ],
 

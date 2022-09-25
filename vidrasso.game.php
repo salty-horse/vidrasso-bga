@@ -176,9 +176,9 @@ class Vidrasso extends Table {
         (see states.inc.php)
     */
     function getGameProgression() {
-        // TODO: compute and return the game progression
-
-        return 0;
+        $target_points = $this->getGameStateValue('targetPoints');
+        $max_score = intval(self::getUniqueValueFromDB('SELECT MAX(player_score) FROM player'));
+        return floor($max_score / $target_points * 100);
     }
 
     //////////////////////////////////////////////////////////////////////////////
