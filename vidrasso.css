@@ -183,3 +183,27 @@
 .bgavid_hand_size {
     padding-left: 46px;
 }
+
+.suit_icon_1::before {
+    font-size: 140%;
+    color: black;
+    content: "♠";
+}
+
+.suit_icon_2::before {
+    font-size: 140%;
+    color: red;
+    content: "♥";
+}
+
+.suit_icon_3::before {
+    font-size: 140%;
+    color: black;
+    content: "♣";
+}
+
+.suit_icon_4::before {
+    font-size: 140%;
+    color: red;
+    content: "♦";
+}

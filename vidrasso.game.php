@@ -252,6 +252,10 @@ class Vidrasso extends Table {
         return $result;
     }
 
+    function formatSuitText($suit_id) {
+        return '<span class="suit_icon_'. $suit_id . '"></span>';
+    }
+
     //////////////////////////////////////////////////////////////////////////////
     //////////// Player actions
     ////////////
@@ -283,7 +287,7 @@ class Vidrasso extends Table {
             self::notifyAllPlayers('selectTrumpSuit', clienttranslate('${player_name} selects ${suit} as the trump suit'), [
                 'player_id' => $player_id,
                 'player_name' => $players[$player_id]['player_name'],
-                'suit' => $this->suits[$trump_id]['name'],
+                'suit' => $this->formatSuitText($trump_id),
                 'suit_id' => $trump_id,
             ]);
         }
@@ -356,14 +360,13 @@ class Vidrasso extends Table {
         $this->deck->moveCard($card_id, 'cardsontable', $player_id);
         if (self::getGameStateValue('ledSuit') == 0)
             self::setGameStateValue('ledSuit', $current_card['type']);
-        self::notifyAllPlayers('playCard', clienttranslate('${player_name} plays the ${value} of ${suit_displayed}'), [
-            'i18n' => ['suit_displayed'],
+        self::notifyAllPlayers('playCard', clienttranslate('${player_name} plays ${value} ${suit_displayed}'), [
             'card_id' => $card_id,'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
             'led_card' => $table_is_empty,
             'value' => $current_card['type_arg'],
             'suit' => $current_card['type'],
-            'suit_displayed' => $this->suits[$current_card['type']]['name']]);
+            'suit_displayed' => $this->formatSuitText($current_card['type'])]);
         // Next player
         $this->gamestate->nextState('');
     }
@@ -569,14 +572,14 @@ class Vidrasso extends Table {
             $points = $score_pile['points'] + $gift_value;
             $sql = "UPDATE player SET player_score=player_score+$points  WHERE player_id='$player_id'";
             self::DbQuery($sql);
-            self::notifyAllPlayers('endHand', clienttranslate('${player_name} scores ${points} points (was gifted ${gift_value} of ${gift_suit_name})'), [
+            self::notifyAllPlayers('endHand', clienttranslate('${player_name} scores ${points} points (was gifted ${gift_value} ${gift_suit_symbol})'), [
                 'i18n' => ['gift_suit_name'],
                 'player_id' => $player_id,
                 'player_name' => $players[$player_id]['player_name'],
                 'points' => $points,
                 'gift_value' => $gift_value,
                 'gift_suit' => $gift_card['type'],
-                'gift_suit_name' => $this->suits[$gift_card['type']]['name'],
+                'gift_suit_symbol' => $this->formatSuitText($gift_card['type']),
             ]);
         }
 
@@ -584,13 +587,74 @@ class Vidrasso extends Table {
         self::notifyAllPlayers('newScores', '', ['newScores' => $new_scores]);
 
         // Check if this is the end of the game
+        $end_of_game = false;
         $target_points = $this->getGameStateValue('targetPoints');
         foreach ($new_scores as $player_id => $score) {
             if ($score >= $target_points) {
-                // Trigger the end of the game !
-                $this->gamestate->nextState('endGame');
-                return;
+                $end_of_game = true;
             }
+        }
+
+        // Display a score table
+        $scoreTable = [];
+        $row = [''];
+        foreach ($players as $player_id => $player) {
+            $row[] = [
+                'str' => '${player_name}',
+                'args' => ['player_name' => $player['player_name']],
+                'type' => 'header'
+            ];
+        }
+        $scoreTable[] = $row;
+
+        $row = [clienttranslate('Received Gift Card')];
+        foreach ($players as $player_id => $player) {
+            $gift_card = $gift_cards_by_player[$player_id];
+            $row[] = [
+                'str' => '${gift_value} ${gift_suit}',
+                'args' => [
+                    'gift_value' => $gift_card['type_arg'],
+                    'gift_suit' => $this->formatSuitText($gift_card['type']),
+                ],
+            ];
+        }
+        $scoreTable[] = $row;
+
+        $row = [clienttranslate('Score Pile')];
+        foreach ($players as $player_id => $player) {
+            $row[] = $score_piles[$player_id]['points'];
+        }
+        $scoreTable[] = $row;
+
+        $row = [clienttranslate('Round Score')];
+        foreach ($players as $player_id => $player) {
+            $row[] = $score_piles[$player_id]['points'] + $gift_cards_by_player[$player_id]['type_arg'];
+        }
+        $scoreTable[] = $row;
+
+        // Add separator before current total score
+        $row = [''];
+        foreach ($players as $player_id => $player) {
+            $row[] = '';
+        }
+        $scoreTable[] = $row;
+
+        $row = [clienttranslate('Cumulative Score')];
+        foreach ($players as $player_id => $player) {
+            $row[] = $new_scores[$player_id];
+        }
+        $scoreTable[] = $row;
+
+        $this->notifyAllPlayers('tableWindow', '', [
+            'id' => 'scoreView',
+            'title' => $end_of_game ? clienttranslate('Final Score') : clienttranslate('End of Round Score'),
+            'table' => $scoreTable,
+            'closing' => clienttranslate('Continue')
+        ]);
+
+        if ($end_of_game) {
+            $this->gamestate->nextState('endGame');
+            return;
         }
 
         // Alternate first player
