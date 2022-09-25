@@ -432,11 +432,14 @@ class Vidrasso extends Table {
             'strawmen' => $public_strawmen,
         ]);
 
+        self::giveExtraTime(self::getActivePlayerId());
+
         $this->gamestate->nextState('');
     }
 
     function stMakeNextPlayerActive() {
-        $this->activeNextPlayer();
+        $player_id = $this->activeNextPlayer();
+        self::giveExtraTime($player_id);
         $this->gamestate->nextState('');
     }
 

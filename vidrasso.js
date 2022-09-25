@@ -493,7 +493,6 @@ function (dojo, declare) {
             dojo.subscribe('giveAllCardsToPlayer', this, 'notif_giveAllCardsToPlayer');
 
             dojo.subscribe('endHand', this, 'notif_endHand');
-            this.notifqueue.setSynchronous('endHand', 1000);
 
             dojo.subscribe('newScores', this, 'notif_newScores');
         },
@@ -612,7 +611,6 @@ function (dojo, declare) {
         },
 
         notif_endHand: function(notif) {
-            // TODO: Animate gifted card
             this.scorePiles[notif.args.player_id].incValue(notif.args.gift_value);
         },
 
