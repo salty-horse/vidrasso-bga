@@ -27,8 +27,8 @@ define([
 function (dojo, declare) {
     return declare('bgagame.vidrasso', ebg.core.gamegui, {
         constructor: function(){
-            this.cardWidth = 72;
-            this.cardHeight = 96;
+            this.cardWidth = 93;
+            this.cardHeight = 93;
 
             this.suitSymbols = {
                 1: {text: '♠', color: 'black'},
@@ -65,7 +65,7 @@ function (dojo, declare) {
             this.playerHand = new ebg.stock();
             this.playerHand.setSelectionMode(1);
             this.playerHand.create(this, $('myhand'), this.cardWidth, this.cardHeight);
-            this.playerHand.image_items_per_row = 13;
+            this.playerHand.image_items_per_row = 9;
 
             dojo.connect(this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged');
 
@@ -78,7 +78,7 @@ function (dojo, declare) {
                 for (let rank = 1; rank <= 9; rank++) {
                     // Build card type id
                     let card_type_id = this.getCardUniqueId(suit, rank);
-                    this.playerHand.addItemType(card_type_id, suit * 10 + rank, g_gamethemeurl + 'img/cards.jpg', card_type_id);
+                    this.playerHand.addItemType(card_type_id, card_type_id, g_gamethemeurl + 'img/cards.png', card_type_id);
                 }
             }
 
@@ -291,22 +291,12 @@ function (dojo, declare) {
         },
 
         getCardUniqueId: function(suit, rank) {
-            if (rank == 1) {
-                rank = 12;
-            } else {
-                rank -= 2;
-            }
-            return (suit - 1) * 13 + rank;
+            return (suit - 1) * 9 + (rank - 1);
         },
 
         getCardSpriteXY: function(suit, rank) {
-            if (rank == 1) {
-                rank = 12;
-            } else {
-                rank -= 2;
-            }
             return {
-                x: this.cardWidth * rank,
+                x: this.cardWidth * (rank - 1),
                 y: this.cardHeight * (suit - 1),
             }
         },
