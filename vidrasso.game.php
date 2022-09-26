@@ -189,7 +189,7 @@ class Vidrasso extends Table {
         $visible_strawmen = [];
         $hidden_strawmen = [];
         for ($i = 1; $i <= 5; $i++) {
-            $straw_cards = array_values($this->deck->getCardsInLocation("straw_{$i}_{$player_id}"));
+            $straw_cards = array_values($this->deck->getCardsInLocation("straw_{$player_id}_{$i}"));
             if (count($straw_cards) >= 1) {
                 array_push($visible_strawmen, $this->getTopStraw($straw_cards));
                 array_push($hidden_strawmen, count($straw_cards) == 2);
@@ -418,8 +418,9 @@ class Vidrasso extends Table {
             $hand_cards = $this->deck->pickCards(8, 'deck', $player_id);
             $player_strawmen = [];
             for ($i = 1; $i <= 5; $i++) {
-                $this->deck->pickCardForLocation('deck', "straw_${i}_{$player_id}", 0);
-                $straw = $this->deck->pickCardForLocation('deck', "straw_${i}_{$player_id}", 1);
+                $location = "straw_{$player_id}_${i}";
+                $this->deck->pickCardForLocation('deck', $location, 0);
+                $straw = $this->deck->pickCardForLocation('deck', $location, 1);
                 array_push($player_strawmen, $straw);
             }
             $public_strawmen[$player_id] = $player_strawmen;
@@ -531,7 +532,7 @@ class Vidrasso extends Table {
                 $player_ids_by_no[$player['player_no']] = $player_id;
                 $pile = $player_strawman_use[$player['player_no']];
                 if ($pile) {
-                    $remaining_cards_in_pile = $this->deck->getCardsInLocation("straw_{$pile}_{$player_id}", null, 'location_arg');
+                    $remaining_cards_in_pile = $this->deck->getCardsInLocation("straw_{$player_id}_{$pile}", null, 'location_arg');
                     if ($remaining_cards_in_pile) {
                         $revealed_cards_by_player[$player_id] = [
                             'pile' => $pile,
