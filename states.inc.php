@@ -92,7 +92,7 @@ $machinestates = [
         'descriptionmyturn' => clienttranslate('${you} must select the trump ${rank_or_suit}'),
         'type' => 'activeplayer',
         'possibleactions' => ['selectTrump'],
-		'args' => 'argSelectTrump',
+        'args' => 'argSelectTrump',
         'transitions' => [
             'selectOtherTrump' => STATE_NEXT_SELECTOR,
             'giftCard' => STATE_GIFT_CARD,
@@ -143,7 +143,7 @@ $machinestates = [
         'descriptionmyturn' => clienttranslate('${you} must play a card'),
         'type' => 'activeplayer',
         'possibleactions' => ['playCard'],
-		'args' => 'argPlayCard',
+        'args' => 'argPlayCard',
         'transitions' => ['' => STATE_NEXT_PLAYER]
     ],
 

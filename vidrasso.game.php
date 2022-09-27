@@ -300,8 +300,12 @@ class Vidrasso extends Table {
      * (note: each method below must match an input method in template.action.php)
      */
     function selectTrump($trump_type, $trump_id) {
-        self::checkAction('selectTrump');
         $player_id = self::getActivePlayerId();
+        $this->selectTrumpForPlayer($trump_type, $trump_id, $player_id);
+    }
+
+    function selectTrumpForPlayer($trump_type, $trump_id, $player_id) {
+        self::checkAction('selectTrump');
         $trump_rank = $this->getGameStateValue('trumpRank');
         $trump_suit = $this->getGameStateValue('trumpSuit');
 
@@ -336,7 +340,12 @@ class Vidrasso extends Table {
     }
 
     function giftCard($card_id) {
-        $player_id = self::getCurrentPlayerId();;
+        $player_id = self::getCurrentPlayerId();
+        $this->giftCardFromPlayer($card_id, $player_id);
+    }
+
+    function giftCardFromPlayer($card_id, $player_id) {
+        self::checkAction('giftCard');
         $cards_in_hand = $this->deck->getPlayerHand($player_id);
         if (!in_array($card_id, array_keys($cards_in_hand))) {
             throw new BgaUserException(self::_('You do not have that card.'));
@@ -347,8 +356,12 @@ class Vidrasso extends Table {
     }
 
     function playCard($card_id) {
-        self::checkAction('playCard');
         $player_id = self::getActivePlayerId();
+        $this->playCardFromPlayer($card_id, $player_id);
+    }
+
+    function playCardFromPlayer($card_id, $player_id) {
+        self::checkAction('playCard');
         $current_card = $this->deck->getCard($card_id);
 
         // Sanity check. A more thorough check is done later.
@@ -366,7 +379,7 @@ class Vidrasso extends Table {
         if (substr($current_card['location'], 0, 5) == 'straw') {
             self::setGameStateValue(
                 'player'.self::getPlayerNoById($player_id).'UsedStrawmanPile',
-                $current_card['location'][6]);
+                substr($current_card['location'], -1));
         }
 
         $this->deck->moveCard($card_id, 'cardsontable', $player_id);
@@ -723,32 +736,39 @@ class Vidrasso extends Table {
 
     function zombieTurn($state, $active_player)
     {
-        $statename = $state['name'];
+        $state_name = $state['name'];
 
-        if ($state['type'] == "activeplayer") {
-            switch ($statename) {
-                default:
-                    $this->gamestate->nextState("zombiePass");
-                    break;
+        if ($state_name == 'selectTrump') {
+            // Select a random trump
+            $trump_rank = $this->getGameStateValue('trumpRank');
+            $trump_suit = $this->getGameStateValue('trumpSuit');
+
+            if ($trump_rank) {
+                $this->selectTrumpForPlayer('suit', bga_rand(1, 4), $active_player);
+            } else if ($trump_suit) {
+                $this->selectTrumpForPlayer('rank', bga_rand(1, 9), $active_player);
+            } else {
+                if (bga_rand(0, 1)) {
+                    $this->selectTrumpForPlayer('suit', bga_rand(1, 4), $active_player);
+                } else {
+                    $this->selectTrumpForPlayer('rank', bga_rand(1, 9), $active_player);
+                }
             }
-
-            return;
+        } else if ($state_name == 'giftCard') {
+            // Gift a random card
+            $cards_in_hand = $this->deck->getPlayerHand($active_player);
+            $random_ix = bga_rand(0, count($cards_in_hand) - 1);
+            $keys = array_keys($cards_in_hand);
+            $card_id = $cards_in_hand[$keys[$random_ix]]['id'];
+            $this->giftCardFromPlayer($card_id, $active_player);
+        } else if ($state_name == 'playerTurn') {
+            // Play a random card
+            $playable_cards = $this->getPlayableCards($active_player);
+            $random_ix = bga_rand(0, count($playable_cards) - 1);
+            $keys = array_keys($playable_cards);
+            $card_id = $playable_cards[$keys[$random_ix]]['id'];
+            $this->playCardFromPlayer($card_id, $active_player);
         }
-
-        if ($state['type'] == "multipleactiveplayer") {
-            // Make sure player is in a non blocking status for role turn
-            $sql = "
-                UPDATE  player
-                SET     player_is_multiactive = 0
-                WHERE   player_id = $active_player
-            ";
-            self::DbQuery($sql);
-
-            $this->gamestate->updateMultiactiveOrNextState('');
-            return;
-        }
-
-        throw new feException("Zombie mode not supported at this game state: ".$statename);
     }
 
 ///////////////////////////////////////////////////////////////////////////////////:
