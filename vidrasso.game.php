@@ -159,9 +159,6 @@ class Vidrasso extends Table {
             $player['hand_size'] = $this->deck->countCardInLocation('hand', $player_id);
         }
 
-        // TODO: Query from card DB once at the top of the function?
-        $result['card_info'] = self::getCollectionFromDb('SELECT card_id id, card_type suit, card_type_arg rank FROM card');
-
         return $result;
     }
 
@@ -227,6 +224,44 @@ class Vidrasso extends Table {
             $value += 50;
         }
         return $value;
+    }
+
+    function getPlayableCards($player_id) {
+        // Collect all cards in hand and visible strawmen
+        $available_cards = $this->deck->getPlayerHand($player_id);
+        $strawmen = $this->getPlayerStrawmen($player_id);
+        foreach ($strawmen['visible'] as $straw_card) {
+            if ($straw_card) {
+                $available_cards[$straw_card['id']] = $straw_card;
+            }
+        }
+
+        // If this is a followed card, make sure it's in the led suit or a trump suit/rank.
+        // If not, make sure the player has no cards of the led suit.
+        $led_suit = self::getGameStateValue('ledSuit');
+        if ($led_suit == 0) {
+            return $available_cards;
+        }
+        $trump_rank = $this->getGameStateValue('trumpRank');
+        $trump_suit = $this->getGameStateValue('trumpSuit');
+
+        $cards_of_led_suit = [];
+        $cards_of_led_suit_and_trumps = [];
+
+        foreach ($available_cards as $available_card_id => $card) {
+            if ($card['type'] == $led_suit) {
+                $cards_of_led_suit[$card['id']] = $card;
+                $cards_of_led_suit_and_trumps[$card['id']] = $card;
+            } else if ($card['type'] == $trump_suit || $card['type_arg'] == $trump_rank) {
+                $cards_of_led_suit_and_trumps[$card['id']] = $card;
+            }
+        }
+
+        if ($cards_of_led_suit) {
+            return $cards_of_led_suit_and_trumps;
+        } else {
+            return $available_cards;
+        }
     }
 
     function getScorePiles() {
@@ -321,34 +356,10 @@ class Vidrasso extends Table {
             throw new BgaUserException(self::_('You do not have this card'));
         }
 
-        // Collect all cards in hand and visible strawmen
-        $available_cards = $this->deck->getPlayerHand($player_id);
-        $strawmen = $this->getPlayerStrawmen($player_id);
-        foreach ($strawmen['visible'] as $straw_card) {
-            if ($straw_card) {
-                $available_cards[$straw_card['id']] = $straw_card;
-            }
-        }
+        $playable_cards = $this->getPlayableCards($player_id);
 
-        // Check that player has the card in hand or as a visible strawman
-        if (!array_key_exists($card_id, $available_cards)) {
-            throw new BgaUserException(self::_('You do not have this card'));
-        }
-
-        // If this is a followed card, make sure it's in the led suit or a trump suit/rank.
-        // If not, make sure the player has no cards of the led suit.
-        $led_suit = self::getGameStateValue('ledSuit');
-        $table_is_empty = intval($this->deck->countCardInLocation('cardsontable')) == 0;
-        if (!$table_is_empty) {
-            $trump_rank = $this->getGameStateValue('trumpRank');
-            $trump_suit = $this->getGameStateValue('trumpSuit');
-            if ($current_card['type'] != $led_suit && $current_card['type'] != $trump_suit && $current_card['type_arg'] != $trump_rank) {
-                // Verify the player has no cards of the led suit
-                foreach ($available_cards as $available_card_id => $card) {
-                    if ($card['type'] == $led_suit)
-                        throw new BgaUserException(self::_('You cannot play off-suit'));
-                }
-            }
+        if (!array_key_exists($card_id, $playable_cards)) {
+            throw new BgaUserException(self::_('You cannot play this card'));
         }
 
         // Remember if the played card is a strawman
@@ -364,7 +375,6 @@ class Vidrasso extends Table {
         self::notifyAllPlayers('playCard', clienttranslate('${player_name} plays ${value} ${suit_displayed}'), [
             'card_id' => $card_id,'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
-            'led_card' => $table_is_empty,
             'value' => $current_card['type_arg'],
             'suit' => $current_card['type'],
             'suit_displayed' => $this->formatSuitText($current_card['type'])]);
@@ -393,6 +403,18 @@ class Vidrasso extends Table {
         return [
             'i18n' => ['rank_or_suit'],
             'rank_or_suit' => $rank_or_suit,
+        ];
+    }
+
+    function argPlayCard() {
+        $player_id = self::getActivePlayerId();
+        $available_cards = $this->getPlayableCards(self::getActivePlayerId());
+        return [
+            '_private' => [
+                'active' => [
+                    'playable_cards' => array_keys($available_cards),
+                ],
+            ],
         ];
     }
 

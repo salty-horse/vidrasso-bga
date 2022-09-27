@@ -82,10 +82,6 @@ function (dojo, declare) {
                 }
             }
 
-            // Mapping of card ids to elements
-            // Include both cards in hand and strawmen
-            this.playerCards = {};
-
             // Cards in player's hand
             this.initPlayerHand(this.gamedatas.hand);
 
@@ -122,7 +118,6 @@ function (dojo, declare) {
                 var value = card.type_arg;
                 var player_id = card.location_arg;
                 this.playCardOnTable(player_id, color, value, card.id);
-                this.ledCard = card.id; // There can only be one card on the table
             }
 
             let elem = document.getElementById('trump_rank');
@@ -188,35 +183,15 @@ function (dojo, declare) {
                         e => e.classList.remove('playable'));
                     break;
                 }
-                if (this.ledCard) {
-                    let led_card_info = this.gamedatas.card_info[this.ledCard];
-
-                    // Player is following
-                    let cards_of_led_suit = [];
-                    let cards_of_led_suit_and_trumps = [];
-                    for (let card_id in this.playerCards) {
-                        let card_elem = this.playerCards[card_id];
-                        let card_info = this.gamedatas.card_info[card_id];
-                        if (card_info.suit == led_card_info.suit) {
-                            cards_of_led_suit.push(card_elem);
-                            cards_of_led_suit_and_trumps.push(card_elem);
-                        } else if (card_info.suit == this.gamedatas.trumpSuit || card_info.rank == this.gamedatas.trumpRank) {
-                            cards_of_led_suit_and_trumps.push(card_elem);
-                        }
+                for (let card_id of args.args._private.playable_cards) {
+                    let elem = document.getElementById(`myhand_item_${card_id}`);
+                    // Look for strawman
+                    if (!elem) {
+                        elem = document.querySelector(`#mystrawmen div[data-card_id="${card_id}"]`)
                     }
-
-                    if (cards_of_led_suit.length == 0) {
-                        // Player can play any card
-                        document.querySelectorAll('#mystrawmen .strawcard, #myhand .stockitem').forEach(
-                            e => e.classList.add('playable'));
-                    } else {
-                        // Player must follow suit or trump
-                        cards_of_led_suit_and_trumps.forEach(e => e.classList.add('playable'))
+                    if (elem) {
+                        elem.classList.add('playable');
                     }
-                } else {
-                    // Player is leading, highlight all cards
-                    document.querySelectorAll('#mystrawmen .strawcard, #myhand .stockitem').forEach(
-                        e => e.classList.add('playable'));
                 }
                 break;
 
@@ -319,7 +294,6 @@ function (dojo, declare) {
                 let suit = card.type;
                 let rank = card.type_arg;
                 this.playerHand.addToStockWithId(this.getCardUniqueId(suit, rank), card.id);
-                this.playerCards[card.id] = document.getElementById(this.playerHand.getItemDivId(card.id));
             }
         },
 
@@ -348,7 +322,6 @@ function (dojo, declare) {
             this.strawmenById[card_id] = newElem;
             if (player_id == this.player_id) {
                 dojo.connect(newElem, 'onclick', this, 'onChoosingStrawman');
-                this.playerCards[card_id] = newElem;
             }
             return newElem;
         },
@@ -518,7 +491,6 @@ function (dojo, declare) {
 
             // We received a new full hand of 13 cards.
             this.playerHand.removeAll();
-            this.playerCards = {};
 
             this.initPlayerHand(notif.args.hand_cards);
         },
@@ -559,7 +531,6 @@ function (dojo, declare) {
 
         notif_giftCard: function(notif) {
             this.playerHand.removeFromStockById(notif.args.card);
-            delete this.playerCards[notif.args.card];
 
             // Decrease hand size of both players, even though one of them may still be thinking
             for (let handSize of Object.values(this.handSizes)) {
@@ -568,14 +539,8 @@ function (dojo, declare) {
         },
 
         notif_playCard: function(notif) {
-            if (notif.args.led_card) {
-                this.ledCard = notif.args.card_id;
-            }
             // Play a card on the table
             this.playCardOnTable(notif.args.player_id, notif.args.suit, notif.args.value, notif.args.card_id);
-
-            // This does nothing if it's the opponent's card
-            delete this.playerCards[notif.args.card_id];
         },
 
         notif_revealStrawmen: function(notif) {
@@ -609,7 +574,6 @@ function (dojo, declare) {
                 anim.play();
             }
             this.scorePiles[winner_id].incValue(notif.args.points);
-            this.ledCard = null;
         },
 
         notif_endHand: function(notif) {

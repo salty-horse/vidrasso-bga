@@ -47,7 +47,7 @@
         </div>
         <div class="playertablecard" id="playertablecard_{PLAYER_ID}"></div>
         <span class="playertable_info">
-            <span class="">Score pile: </span>
+            <span class="">{SCORE_PILE}: </span>
             <span id="score_pile_{PLAYER_ID}"></span>
         </span>
     </div>
@@ -57,7 +57,7 @@
 
 <div id="trumpSelector" class="whiteblock">
     <div>
-    <div>Trump rank:</div>
+    <div>{TRUMP_RANK}:</div>
     <div id="trump_rank" class="trump_indicator"></div>
     <ul id="rankSelector">
         <li data-type="rank" data-id="1">1</li>
@@ -73,7 +73,7 @@
     </div>
     <br>
     <div>
-    <div>Trump suit:</div>
+    <div>{TRUMP_SUIT}:</div>
     <div id="trump_suit" class="trump_indicator"></div>
     <ul id="suitSelector">
         <li data-type="suit" class="suit_icon_1" data-id="1"></li>
