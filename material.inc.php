@@ -20,7 +20,6 @@
  */
 
 $this->suits = [
-    // Suit names are unused
     1 => ['name' => clienttranslate('spades')],
     2 => ['name' => clienttranslate('hearts')],
     3 => ['name' => clienttranslate('clubs')],

@@ -253,7 +253,8 @@ class Vidrasso extends Table {
     }
 
     function formatSuitText($suit_id) {
-        return '<span class="suit_icon_'. $suit_id . '"></span>';
+        $suit_name = $this->suits[$suit_id]['name'];
+        return "<div role=\"img\" title=\"$suit_name\" aria-label=\"$suit_name\" class=\"log_suit suit_icon_$suit_id\"></div>";
     }
 
     //////////////////////////////////////////////////////////////////////////////

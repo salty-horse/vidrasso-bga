@@ -76,10 +76,10 @@
     <div>Trump suit:</div>
     <div id="trump_suit" class="trump_indicator"></div>
     <ul id="suitSelector">
-        <li data-type="suit" data-id="1">♠</li>
-        <li data-type="suit" style="color: red" data-id="2">♥</li>
-        <li data-type="suit" data-id="3">♣</li>
-        <li data-type="suit" style="color: red" data-id="4">♦</li>
+        <li data-type="suit" class="suit_icon_1" data-id="1"></li>
+        <li data-type="suit" class="suit_icon_2" data-id="2"></li>
+        <li data-type="suit" class="suit_icon_3" data-id="3"></li>
+        <li data-type="suit" class="suit_icon_4" data-id="4"></li>
     </ul>
     </div>
 </div>

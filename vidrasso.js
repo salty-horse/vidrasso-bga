@@ -113,6 +113,7 @@ function (dojo, declare) {
                 // Strawmen
                 this.initStrawmen(player_id, player_info.visible_strawmen, player_info.more_strawmen);
             }
+            this.addTooltipToClass('bgavid_hand_size', _('Number of cards in hand'), '');
 
             // Cards played on table
             for (i in this.gamedatas.cardsontable) {
@@ -124,16 +125,19 @@ function (dojo, declare) {
                 this.ledCard = card.id; // There can only be one card on the table
             }
 
+            let elem = document.getElementById('trump_rank');
             if (this.gamedatas.trumpRank != "0") {
-                let elem = document.getElementById('trump_rank');
                 elem.textContent = this.gamedatas.trumpRank;
+            } else {
+                elem.textContent = '?';
             }
 
+            elem = document.getElementById('trump_suit');
             if (this.gamedatas.trumpSuit != "0") {
-                let elem = document.getElementById('trump_suit');
-                let suit = this.suitSymbols[this.gamedatas.trumpSuit];
-                elem.textContent = suit.text;
-                elem.style.color = suit.color;
+                elem.className = `trump_indicator suit_icon_${this.gamedatas.trumpSuit}`;
+            } else {
+                elem.textContent = '?';
+                elem.className = 'trump_indicator';
             }
 
             this.addTooltipToClass("playertablecard", _("Card played on the table"), '');
@@ -160,6 +164,14 @@ function (dojo, declare) {
                     document.getElementById('playertables').style.display = 'none';
                     document.getElementById('rankSelector').style.display = (this.gamedatas.trumpRank == '0') ? 'inline-block' : 'none';
                     document.getElementById('suitSelector').style.display = (this.gamedatas.trumpSuit == '0') ? 'inline-block' : 'none';
+                    let elem = document.getElementById('trump_rank');
+                    if (elem.textContent == '?') {
+                        elem.textContent = '';
+                    }
+                    elem = document.getElementById('trump_suit');
+                    if (elem.textContent == '?') {
+                        elem.textContent = '';
+                    }
                 }
                 break;
 
@@ -488,8 +500,10 @@ function (dojo, declare) {
         },
 
         notif_newHand: function(notif) {
-            document.getElementById('trump_rank').textContent = '';
-            document.getElementById('trump_suit').textContent = '';
+            document.getElementById('trump_rank').textContent = '?';
+            let elem = document.getElementById('trump_suit');
+            elem.textContent = '?';
+            elem.className = 'trump_indicator';
             this.gamedatas.trumpRank = '0';
             this.gamedatas.trumpSuit = '0';
 
@@ -532,15 +546,13 @@ function (dojo, declare) {
         notif_selectTrumpSuit: function(notif) {
             this.gamedatas.trumpSuit = notif.args.suit_id;
             let elem = document.getElementById('trump_suit');
-            let suit = this.suitSymbols[notif.args.suit_id];
-            elem.textContent = suit.text;
-            elem.style.color = suit.color;
             elem.style.display = 'block';
+            elem.textContent = '';
+            elem.className = `trump_indicator suit_icon_${this.gamedatas.trumpSuit}`;
             document.getElementById('suitSelector').style.display = 'none';
 
             elem = document.getElementById('trump_rank');
             if (elem.style.display == 'none') {
-                elem.textContent = '?';
                 elem.style.display = 'block';
             }
         },

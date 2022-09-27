@@ -161,12 +161,12 @@
 }
 
 .straw_more {
-    background-color: rgb(66, 123, 245);
+    background-image: url('img/card_back.png');
     width: 93px;
     height: 93px;
     position: absolute;
-    top: -5px;
-    left: 0px;
+    top: -7px;
+    left: -2px;
 	border-radius: 25%;
 	box-shadow: 1px 1px 1px 1px black;
 }
@@ -191,26 +191,37 @@
     padding-left: 46px;
 }
 
-.suit_icon_1::before {
-    font-size: 140%;
-    color: black;
-    content: "♠";
+/* Spade */
+.suit_icon_1 {
+	background-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIHdpZHRoPSIxMC44MjRtbSIgaGVpZ2h0PSIxMm1tIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAxMC44MjQgMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLS43MjExIC0uMjk4NzMpIj48cGF0aCBkPSJtNi4xMzMxIDAuMjk4NzMtNC43NzI3IDUuMjkxMmg0LjU3ZS00YTIuNzA2MSAyLjUzNTkgMCAwIDAtMC42Mzk3NCAxLjYzNyAyLjcwNjEgMi41MzU5IDAgMCAwIDIuNzA2MSAyLjUzNTkgMi43MDYxIDIuNTM1OSAwIDAgMCAyLjM0NjktMS4yNzk3bC0xLjA5MTEgMy44MTU2aDIuOTAwNGwtMS4wODk4LTMuODExNWEyLjcwNjEgMi41MzU5IDAgMCAwIDIuMzQ1NyAxLjI3NTYgMi43MDYxIDIuNTM1OSAwIDAgMCAyLjcwNi0yLjUzNTkgMi43MDYxIDIuNTM1OSAwIDAgMC0wLjYzOTc0LTEuNjM3aDMuNTllLTR6IiBmaWxsPSIjYWM5OGIzIiBmaWxsLW9wYWNpdHk9Ii45NDExOCIgc3R5bGU9InBhaW50LW9yZGVyOm5vcm1hbCIvPjwvZz48L3N2Zz4K");
+	background-position: center;
+	background-repeat: no-repeat;
 }
 
-.suit_icon_2::before {
-    font-size: 140%;
-    color: red;
-    content: "♥";
+/* Heart */
+.suit_icon_2 {
+	background-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIHdpZHRoPSIxMC44MjRtbSIgaGVpZ2h0PSIxMm1tIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAxMC44MjQgMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLS44NjI1NCAtNjguODc3KSI+PHBhdGggZD0ibTYuMjc1NSA4MC44NzctNS4wNDk3LTguMTk2MiAwLjAwMTgtNi42ZS00YTIuNzA2MSAyLjUzNTkgMCAwIDEtMC4zNjUtMS4yNjczIDIuNzA2MSAyLjUzNTkgMCAwIDEgMi43MDYtMi41MzU5IDIuNzA2MSAyLjUzNTkgMCAwIDEgMi43MDYxIDIuNTM1OSAyLjcwNjEgMi41MzU5IDAgMCAxIDIuNzA2MS0yLjUzNTkgMi43MDYxIDIuNTM1OSAwIDAgMSAyLjcwNjEgMi41MzU5IDIuNzA2MSAyLjUzNTkgMCAwIDEtMC4zNjUwMiAxLjI2NzNsMC4wMDE4IDYuNmUtNHoiIGZpbGw9IiNmZjRlNGUiIGZpbGwtb3BhY2l0eT0iLjk0MTE4IiBzdHlsZT0icGFpbnQtb3JkZXI6bm9ybWFsIi8+PC9nPjwvc3ZnPgo=");
+	background-position: center;
+	background-repeat: no-repeat;
 }
 
-.suit_icon_3::before {
-    font-size: 140%;
-    color: black;
-    content: "♣";
+/* Club */
+.suit_icon_3 {
+	background-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIHdpZHRoPSIxMC44MjRtbSIgaGVpZ2h0PSIxMm1tIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAxMC44MjQgMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzguODc3IC03MS4zODcpIj48cGF0aCBkPSJtLTMzLjQ2NSA3MS4zODdjLTEuMjI0OCAwLTIuMjk2OCAwLjc3MDg5LTIuNjEzOCAxLjg3OTUtMC4zMTY5OCAxLjEwODcgMC4yMDAxNCAyLjI3ODYgMS4yNjA4IDIuODUyNS0xLjA2MDctMC41NzM4OC0yLjQwMDUtMC40MDg1My0zLjI2NjUgMC40MDMwNS0wLjg2NjA0IDAuODExNi0xLjA0MjQgMi4wNjcxLTAuNDI5OTggMy4wNjExIDAuNjEyNDEgMC45OTM5OSAxLjg2MDggMS40Nzg2IDMuMDQzOSAxLjE4MTUgMC43MTIxLTAuMTc4ODMgMS4yOTMzLTAuNjE0MTggMS42NDM0LTEuMTgyNmwtMS4wODc5IDMuODA1aDIuOTAwM2wtMS4wODgtMy44MDUzYzAuMzUwMSAwLjU2ODU5IDAuOTMxMjUgMS4wMDQxIDEuNjQzNSAxLjE4MyAxLjE4MyAwLjI5NzAzIDIuNDMxNi0wLjE4NzU3IDMuMDQ0LTEuMTgxNSAwLjYxMjM4LTAuOTkzOTggMC40MzU5Ni0yLjI0OTUtMC40MzAxMS0zLjA2MTEtMC44NjYwNC0wLjgxMTYtMi4yMDU4LTAuOTc2OTQtMy4yNjY1LTAuNDAzMDYgMS4wNjA3LTAuNTczODggMS41Nzc5LTEuNzQzOCAxLjI2MDktMi44NTI1LTAuMzE3MDEtMS4xMDg2LTEuMzg5MS0xLjg3OTUtMi42MTM5LTEuODc5NXoiIGZpbGw9IiM3OGUwNzciIGZpbGwtb3BhY2l0eT0iLjk0MTE4IiBzdHlsZT0icGFpbnQtb3JkZXI6bm9ybWFsIi8+PC9nPjwvc3ZnPgo=");
+	background-position: center;
+	background-repeat: no-repeat;
 }
 
-.suit_icon_4::before {
-    font-size: 140%;
-    color: red;
-    content: "♦";
+/* Diamond */
+.suit_icon_4 {
+	background-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIHdpZHRoPSIxMC44MjRtbSIgaGVpZ2h0PSIxMm1tIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAxMC44MjQgMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0ibTUuNDEyMSAyLjkyNTZlLTcgLTUuNDEyMSA2IDUuNDEyMSA2IDUuNDEyMS02eiIgZmlsbD0iIzMxNjlhYSIgZmlsbC1vcGFjaXR5PSIuOTQxMTgiIHN0eWxlPSJwYWludC1vcmRlcjpub3JtYWwiLz48L3N2Zz4K");
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+.log_suit {
+	display: inline-block;
+	background-size: contain;
+	width: 0.8em;
+	height: 0.8em;
 }
