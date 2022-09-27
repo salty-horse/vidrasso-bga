@@ -117,7 +117,7 @@ function (dojo, declare) {
                 var color = card.type;
                 var value = card.type_arg;
                 var player_id = card.location_arg;
-                this.playCardOnTable(player_id, color, value, card.id);
+                this.putCardOnTable(player_id, color, value, card.id);
             }
 
             let elem = document.getElementById('trump_rank');
@@ -326,7 +326,8 @@ function (dojo, declare) {
             return newElem;
         },
 
-        playCardOnTable: function(player_id, suit, rank, card_id) {
+        putCardOnTable: function(player_id, suit, rank, card_id) {
+            let cardInHand = false;
             let spriteCoords = this.getCardSpriteXY(suit, rank);
             let placedCard = dojo.place(this.format_block('jstpl_cardontable', {
                 x : spriteCoords.x,
@@ -334,6 +335,10 @@ function (dojo, declare) {
                 player_id : player_id
             }), 'playertablecard_' + player_id);
             placedCard.dataset.card_id = card_id;
+        },
+
+        playCardOnTable: function(player_id, suit, rank, card_id) {
+            this.putCardOnTable(player_id, suit, rank, card_id);
 
             let strawElem = this.strawmenById[card_id];
             if (strawElem) {
@@ -461,14 +466,12 @@ function (dojo, declare) {
             dojo.subscribe('selectTrumpSuit', this, 'notif_selectTrumpSuit');
             dojo.subscribe('giftCard', this, 'notif_giftCard');
             dojo.subscribe('playCard', this, 'notif_playCard');
+            this.notifqueue.setSynchronous('playCard', 1000);
             dojo.subscribe('revealStrawmen', this, 'notif_revealStrawmen');
-
             dojo.subscribe('trickWin', this, 'notif_trickWin');
-            this.notifqueue.setSynchronous('trickWin', 1000);
             dojo.subscribe('giveAllCardsToPlayer', this, 'notif_giveAllCardsToPlayer');
-
+            this.notifqueue.setSynchronous('giveAllCardsToPlayer', 1000);
             dojo.subscribe('endHand', this, 'notif_endHand');
-
             dojo.subscribe('newScores', this, 'notif_newScores');
         },
 
@@ -560,7 +563,7 @@ function (dojo, declare) {
         },
 
         notif_trickWin: function(notif) {
-             // We do nothing here (just wait in order players can view the cards played before they're gone
+            // We do nothing here (just wait in order players can view the cards played before they're gone
         },
 
         notif_giveAllCardsToPlayer: function(notif) {
