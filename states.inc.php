@@ -58,6 +58,7 @@ define('STATE_NEXT_SELECTOR', 4);
 define('STATE_GIFT_CARD', 5);
 define('STATE_FIRST_TRICK', 6);
 define('STATE_NEW_TRICK', 7);
+define('STATE_PLAYER_TURN_TRY_AUTOPLAY', 12);
 define('STATE_PLAYER_TURN', 8);
 define('STATE_NEXT_PLAYER', 9);
 define('STATE_REVEAL_STRAWMEN', 10);
@@ -134,7 +135,18 @@ $machinestates = [
         'description' => '',
         'type' => 'game',
         'action' => 'stNewTrick',
-        'transitions' => ['' => STATE_PLAYER_TURN]
+        'transitions' => ['' => STATE_PLAYER_TURN_TRY_AUTOPLAY]
+    ],
+
+    STATE_PLAYER_TURN_TRY_AUTOPLAY => [
+        'name' => 'playerTurnTryAutoplay',
+        'description' => '',
+        'type' => 'game',
+        'action' => 'stPlayerTurnTryAutoplay',
+        'transitions' => [
+            'playerTurn' => STATE_PLAYER_TURN,
+            'nextPlayer' => STATE_NEXT_PLAYER,
+        ]
     ],
 
     STATE_PLAYER_TURN => [
@@ -153,7 +165,7 @@ $machinestates = [
         'type' => 'game',
         'action' => 'stNextPlayer',
         'transitions' => [
-            'nextPlayer' => STATE_PLAYER_TURN,
+            'nextPlayer' => STATE_PLAYER_TURN_TRY_AUTOPLAY,
             'revealStrawmen' => STATE_REVEAL_STRAWMEN,
         ]
     ],

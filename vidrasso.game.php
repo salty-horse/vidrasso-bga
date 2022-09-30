@@ -264,6 +264,24 @@ class Vidrasso extends Table {
         }
     }
 
+    // A card can be autoplayed if it's the only one left, or if the hand is empty
+    // and there's only one legal strawman
+    function getAutoplayCard($player_id) {
+        $cards_in_hand = $this->deck->getPlayerHand($player_id);
+        if (count($cards_in_hand) == 1) {
+            $visible_strawmen = array_filter($this->getPlayerStrawmen($player_id)['visible'], fn($x) => !is_null($x));
+            if (!$visible_strawmen)
+                return array_values($cards_in_hand)[0]['id'];
+        } else if (!$cards_in_hand) {
+            $playable_cards = $this->getPlayableCards($player_id);
+            if (count($playable_cards) == 1) {
+                return array_values($playable_cards)[0]['id'];
+            }
+        }
+
+        return null;
+    }
+
     function getScorePiles() {
         $players = self::loadPlayersBasicInfos();
         $result = [];
@@ -356,12 +374,15 @@ class Vidrasso extends Table {
     }
 
     function playCard($card_id) {
+        self::checkAction('playCard');
         $player_id = self::getActivePlayerId();
         $this->playCardFromPlayer($card_id, $player_id);
+
+        // Next player
+        $this->gamestate->nextState('');
     }
 
     function playCardFromPlayer($card_id, $player_id) {
-        self::checkAction('playCard');
         $current_card = $this->deck->getCard($card_id);
 
         // Sanity check. A more thorough check is done later.
@@ -391,18 +412,16 @@ class Vidrasso extends Table {
             'value' => $current_card['type_arg'],
             'suit' => $current_card['type'],
             'suit_displayed' => $this->formatSuitText($current_card['type'])]);
-        // Next player
-        $this->gamestate->nextState('');
     }
 
-        //////////////////////////////////////////////////////////////////////////////
-        //////////// Game state arguments
-        ////////////
-        /*
-     * Here, you can create methods defined as "game state arguments" (see "args" property in states.inc.php).
-     * These methods function is to return some additional information that is specific to the current
-     * game state.
-     */
+    //////////////////////////////////////////////////////////////////////////////
+    //////////// Game state arguments
+    ////////////
+    /*
+    * Here, you can create methods defined as "game state arguments" (see "args" property in states.inc.php).
+    * These methods function is to return some additional information that is specific to the current
+    * game state.
+    */
     function argSelectTrump() {
         $trump_suit = $this->getGameStateValue('trumpSuit');
         $trump_rank = $this->getGameStateValue('trumpRank');
@@ -551,6 +570,17 @@ class Vidrasso extends Table {
         ]);
 
         $this->gamestate->nextState('revealStrawmen');
+    }
+
+    function stPlayerTurnTryAutoplay() {
+        $player_id = $this->getActivePlayerId();
+        $autoplay_card_id = $this->getAutoplayCard($player_id);
+        if ($autoplay_card_id) {
+            $this->playCardFromPlayer($autoplay_card_id, $player_id);
+            $this->gamestate->nextState('nextPlayer');
+        } else {
+            $this->gamestate->nextState('playerTurn');
+        }
     }
 
     function stRevealStrawmen() {
@@ -768,6 +798,9 @@ class Vidrasso extends Table {
             $keys = array_keys($playable_cards);
             $card_id = $playable_cards[$keys[$random_ix]]['id'];
             $this->playCardFromPlayer($card_id, $active_player);
+
+            // Next player
+            $this->gamestate->nextState('');
         }
     }
 

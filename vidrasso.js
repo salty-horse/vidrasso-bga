@@ -176,9 +176,9 @@ function (dojo, declare) {
                     e => e.classList.add('playable'));
                 break;
 
-            // Mark playable cards and active player
+            // Mark playable cards
             case 'playerTurn':
-                this.markActivePlayer(true);
+                this.markActivePlayerTable(true);
                 if (!this.isCurrentPlayerActive()) {
                     document.querySelectorAll('#mystrawmen .playable, #myhand .playable').forEach(
                         e => e.classList.remove('playable'));
@@ -197,7 +197,7 @@ function (dojo, declare) {
                 break;
 
             case 'endHand':
-                this.markActivePlayer(true);
+                this.markActivePlayerTable(false);
                 break;
             }
         },
@@ -364,7 +364,14 @@ function (dojo, declare) {
             this.slideToObject('cardontable_' + player_id, 'playertablecard_' + player_id).play();
         },
 
-        markActivePlayer: function(turn_on, player_id) {
+        markActivePlayerTable: function(turn_on, player_id) {
+            if (!player_id) {
+                player_id = this.getActivePlayerId();
+            }
+            if (turn_on && player_id && document.getElementById(`playertable_${player_id}`).classList.contains('table_currentplayer'))
+                // Do nothing
+                return;
+
             // Remove from all players before adding for desired player
             document.querySelectorAll('#playertables .table_currentplayer').forEach(
                 e => e.classList.remove('table_currentplayer'));
@@ -372,9 +379,7 @@ function (dojo, declare) {
                 return;
             }
             if (!player_id) {
-                player_id = this.getActivePlayerId();
-                if (!player_id)
-                    return;
+                return;
             }
             document.getElementById(`playertable_${player_id}`).classList.add('table_currentplayer')
         },
@@ -556,7 +561,9 @@ function (dojo, declare) {
         },
 
         notif_playCard: function(notif) {
-            // Play a card on the table
+            // Mark the active player, in case this was an automated move (skipping playerTurn state)
+            this.markActivePlayerTable(true, notif.args.player_id);
+
             this.playCardOnTable(notif.args.player_id, notif.args.suit, notif.args.value, notif.args.card_id);
         },
 
