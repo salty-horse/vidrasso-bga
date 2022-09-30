@@ -49,9 +49,29 @@ $stats_type = [
 
     // Statistics global to table
     'table' => [
+        'number_of_rounds_standard_game' => [
+            'id' => 10,
+            'name' => totranslate('Number of rounds in a standard game'),
+            'type' => 'int'
+        ],
+        'number_of_rounds_long_game' => [
+            'id' => 11,
+            'name' => totranslate('Number of rounds in a long game'),
+            'type' => 'int'
+        ],
+        'average_points_per_trick' => [
+            'id' => 11,
+            'name' => totranslate('Average points per trick'),
+            'type' => 'int'
+        ],
     ],
 
     // Statistics existing for each player
     'player' => [
+        'win_all_tricks_in_round' => [
+            'id' => 10,
+            'name' => totranslate('Win all tricks in a round'),
+            'type' => 'int'
+        ],
     ]
 ];
