@@ -41,13 +41,13 @@
 <div id="playertables">
 
     <!-- BEGIN player -->
-    <div class="playertable whiteblock playertable_{DIR}">
+    <div id="playertable_{PLAYER_ID}" class="playertable whiteblock playertable_{DIR}">
         <div class="playertablename" style="color:#{PLAYER_COLOR}">
             {PLAYER_NAME}
         </div>
         <div class="playertablecard" id="playertablecard_{PLAYER_ID}"></div>
         <span class="playertable_info">
-            <span class="">{SCORE_PILE}: </span>
+            <span>{SCORE_PILE}: </span>
             <span id="score_pile_{PLAYER_ID}"></span>
         </span>
     </div>

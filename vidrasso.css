@@ -61,9 +61,13 @@
 .playertable {
     text-align: center;
     width: 180px;
-    height: 130px;
     float: left;
     margin-right: 60px;
+}
+
+.table_currentplayer {
+    outline: 2px dashed black;
+    outline-offset: -2px;
 }
 
 #trumpSelector {

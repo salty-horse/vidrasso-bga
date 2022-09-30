@@ -176,8 +176,9 @@ function (dojo, declare) {
                     e => e.classList.add('playable'));
                 break;
 
-            // Mark playable cards
+            // Mark playable cards and active player
             case 'playerTurn':
+                this.markActivePlayer(true);
                 if (!this.isCurrentPlayerActive()) {
                     document.querySelectorAll('#mystrawmen .playable, #myhand .playable').forEach(
                         e => e.classList.remove('playable'));
@@ -195,7 +196,8 @@ function (dojo, declare) {
                 }
                 break;
 
-            case 'dummmy':
+            case 'endHand':
+                this.markActivePlayer(true);
                 break;
             }
         },
@@ -212,14 +214,11 @@ function (dojo, declare) {
                 document.getElementById('playertables').style.display = 'inline-block';
                 break;
 
-            // Unmark playable cards
+            // Unmark playable cards and active player
             case 'giftCard':
             case 'playerTurn':
                 document.querySelectorAll('#mystrawmen .playable, #myhand .playable').forEach(
                     e => e.classList.remove('playable'));
-                break;
-
-            case 'dummmy':
                 break;
             }
         },
@@ -363,6 +362,21 @@ function (dojo, declare) {
 
             // In any case: move it to its final destination
             this.slideToObject('cardontable_' + player_id, 'playertablecard_' + player_id).play();
+        },
+
+        markActivePlayer: function(turn_on, player_id) {
+            // Remove from all players before adding for desired player
+            document.querySelectorAll('#playertables .table_currentplayer').forEach(
+                e => e.classList.remove('table_currentplayer'));
+            if (!turn_on) {
+                return;
+            }
+            if (!player_id) {
+                player_id = this.getActivePlayerId();
+                if (!player_id)
+                    return;
+            }
+            document.getElementById(`playertable_${player_id}`).classList.add('table_currentplayer')
         },
 
         // /////////////////////////////////////////////////
