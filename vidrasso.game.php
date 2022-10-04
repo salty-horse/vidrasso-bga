@@ -366,7 +366,7 @@ class Vidrasso extends Table {
         self::checkAction('giftCard');
         $cards_in_hand = $this->deck->getPlayerHand($player_id);
         if (!in_array($card_id, array_keys($cards_in_hand))) {
-            throw new BgaUserException(self::_('You do not have that card.'));
+            throw new BgaUserException(self::_('You do not have this card'));
         }
         $this->deck->moveCard($card_id, 'gift', self::getPlayerAfter($player_id));
         self::notifyPlayer($player_id, 'giftCard', '', ['card' => $card_id]);
