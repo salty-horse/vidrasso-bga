@@ -74,6 +74,12 @@ class Vidrasso extends Table {
         foreach ($players as $player_id => $player) {
             $color = array_shift($default_colors);
             $values[] = "('".$player_id."','$color','".$player['player_canal']."','".addslashes($player['player_name'])."','".addslashes($player['player_avatar'])."')";
+
+            // Player statistics
+            $this->initStat('player', 'won_tricks', 0, $player_id);
+            $this->initStat('player', 'average_points_per_trick', 0, $player_id);
+            $this->initStat('player', 'number_of_trumps_dealt', 0, $player_id);
+            $this->initStat('player', 'win_all_tricks_in_round', 0, $player_id);
         }
         $sql .= implode($values, ',');
         self::DbQuery($sql);
@@ -108,6 +114,14 @@ class Vidrasso extends Table {
         $player_id = self::getActivePlayerId();
         self::setGameStateInitialValue('firstPlayer', $player_id);
         self::setGameStateInitialValue('firstPicker', $player_id);
+
+        // Game statistics
+        if ($this->getGameStateValue('targetPoints') == 300) {
+            $this->initStat('table', 'number_of_rounds_standard_game', 0);
+        } else {
+            $this->initStat('table', 'number_of_rounds_long_game', 0);
+        }
+
 
         /************ End of the game initialization *****/
     }
@@ -154,7 +168,7 @@ class Vidrasso extends Table {
             $strawmen = $this->getPlayerStrawmen($player_id);
             $player['visible_strawmen'] = $strawmen['visible'];
             $player['more_strawmen'] = $strawmen['more'];
-            $player['tricks_won'] = $score_piles[$player_id]['tricks_won'];
+            $player['won_tricks'] = $score_piles[$player_id]['won_tricks'];
             $player['score_pile'] = $score_piles[$player_id]['points'];
             $player['hand_size'] = $this->deck->countCardInLocation('hand', $player_id);
         }
@@ -299,7 +313,7 @@ class Vidrasso extends Table {
         }
 
         foreach ($players as $player_id => $player) {
-            $result[$player_id]['tricks_won'] = $pile_size_by_player[$player_id] / 2;
+            $result[$player_id]['won_tricks'] = $pile_size_by_player[$player_id] / 2;
         }
 
         return $result;
@@ -334,6 +348,7 @@ class Vidrasso extends Table {
 
         $players = self::loadPlayersBasicInfos();
         if ($trump_type == 'rank') {
+            $trump_rank = $trump_id;
             self::setGameStateValue('trumpRank', $trump_id);
             self::notifyAllPlayers('selectTrumpRank', clienttranslate('${player_name} selects ${rank} as the trump rank'), [
                 'player_id' => $player_id,
@@ -341,6 +356,7 @@ class Vidrasso extends Table {
                 'rank' => $this->values_label[$trump_id],
             ]);
         } else {
+            $trump_suit = $trump_id;
             self::setGameStateValue('trumpSuit', $trump_id);
             self::notifyAllPlayers('selectTrumpSuit', clienttranslate('${player_name} selects ${suit} as the trump suit'), [
                 'player_id' => $player_id,
@@ -350,7 +366,20 @@ class Vidrasso extends Table {
             ]);
         }
 
-        if ($trump_rank || $trump_suit) {
+        if ($trump_rank && $trump_suit) {
+            // Update hand statistics
+            foreach ($players as $player_id => $player) {
+                // Count all player cards that match the trump suit or trump rank
+                $trump_count = self::getUniqueValueFromDB(
+                    "select count(*) from card " .
+                    "where (card_type = '$trump_suit' or card_type_arg = $trump_rank) and " .
+                    "((card_location = 'hand' and card_location_arg = '$player_id') or " .
+                    "card_location like 'straw_${player_id}_%')");
+                self::DbQuery(
+                    "UPDATE player SET player_number_of_trumps_dealt = player_number_of_trumps_dealt + $trump_count " .
+                    "WHERE player_id = $player_id");
+            }
+
             $this->gamestate->nextState('giftCard');
         } else {
             $this->gamestate->nextState('selectOtherTrump');
@@ -554,9 +583,8 @@ class Vidrasso extends Table {
         // Move all cards to the winner's scorepile
         $this->deck->moveAllCardsInLocation('cardsontable', 'scorepile', null, $winning_player);
 
-        // Notify
-        // Note: we use 2 notifications here in order we can pause the display during the first notification
-        //  before we move all cards to the winner (during the second)
+        // Note: we use 2 notifications to pause the display during the first notification
+        // before cards are collected by the winner
         $players = self::loadPlayersBasicInfos();
         $points = $cards_on_table[0]['type_arg'] + $cards_on_table[1]['type_arg'];
         self::notifyAllPlayers('trickWin', clienttranslate('${player_name} wins the trick and ${points} points'), [
@@ -651,6 +679,16 @@ class Vidrasso extends Table {
                 'gift_suit' => $gift_card['type'],
                 'gift_suit_symbol' => $this->formatSuitText($gift_card['type']),
             ]);
+
+            $this->incStat($score_pile['won_tricks'], 'won_tricks', $player_id);
+            if ($score_pile['won_tricks'] == 17) {
+                $this->incStat(1, 'win_all_tricks_in_round', $player_id);
+            }
+
+            // This stores the total score minus gift cards, used for calculating average_points_per_trick
+            self::DbQuery(
+                "UPDATE player SET player_total_score_pile = player_total_score_pile + {$score_pile['points']} " .
+                "WHERE player_id = $player_id");
         }
 
         $new_scores = self::getCollectionFromDb('SELECT player_id, player_score FROM player', true);
@@ -723,8 +761,23 @@ class Vidrasso extends Table {
         ]);
 
         if ($end_of_game) {
+            // Update statistics
+            $player_stats = self::getCollectionFromDb(
+                'SELECT player_id, player_total_score_pile points, player_number_of_trumps_dealt trumps FROM player');
+            foreach ($players as $player_id => $player) {
+                $won_tricks = $this->getStat('won_tricks', $player_id);
+                $this->setStat($player_stats[$player_id]['points'] / $won_tricks, 'average_points_per_trick', $player_id);
+                $this->setStat($player_stats[$player_id]['trumps'], 'number_of_trumps_dealt', $player_id);
+            }
+
             $this->gamestate->nextState('endGame');
             return;
+        } else {
+            if ($target_points == 300) {
+                $this->incStat(1, 'number_of_rounds_standard_game');
+            } else {
+                $this->incStat(1, 'number_of_rounds_long_game');
+            }
         }
 
         // Alternate first player

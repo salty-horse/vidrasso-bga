@@ -31,3 +31,10 @@ CREATE TABLE IF NOT EXISTS `card` (
 -- Example 2: add a custom field to the standard "player" table
 -- ALTER TABLE `player` ADD `player_my_custom_field` INT UNSIGNED NOT NULL DEFAULT '0';
 
+
+ALTER TABLE `player`
+    ADD `player_total_score_pile` INT UNSIGNED NOT NULL DEFAULT '0',
+
+    -- Used for statistics. Only set at the end of the game to avoid revealing hidden info.
+    ADD `player_number_of_trumps_dealt` INT UNSIGNED NOT NULL DEFAULT '0';
+

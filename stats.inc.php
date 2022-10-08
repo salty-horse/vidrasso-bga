@@ -59,17 +59,27 @@ $stats_type = [
             'name' => totranslate('Number of rounds in a long game'),
             'type' => 'int'
         ],
-        'average_points_per_trick' => [
-            'id' => 11,
-            'name' => totranslate('Average points per trick'),
-            'type' => 'int'
-        ],
     ],
 
     // Statistics existing for each player
     'player' => [
-        'win_all_tricks_in_round' => [
+        'won_tricks' => [
             'id' => 10,
+            'name' => totranslate('Won tricks'),
+            'type' => 'int'
+        ],
+        'average_points_per_trick' => [
+            'id' => 11,
+            'name' => totranslate('Average points per trick'),
+            'type' => 'float'
+        ],
+        'number_of_trumps_dealt' => [
+            'id' => 12,
+            'name' => totranslate('Number of trumps dealt'),
+            'type' => 'int'
+        ],
+        'win_all_tricks_in_round' => [
+            'id' => 13,
             'name' => totranslate('Win all tricks in a round'),
             'type' => 'int'
         ],
