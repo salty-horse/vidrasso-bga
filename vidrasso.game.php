@@ -557,9 +557,9 @@ class Vidrasso extends Table {
 
         // Trump rank is involved
         if ($cards_on_table[0]['type_arg'] == $trump_rank || $cards_on_table[1]['type_arg'] == $trump_rank) {
-            // If both cards are trump rank, second wins.
+            // If both cards are trump rank, last played card wins.
             if ($cards_on_table[0]['type_arg'] == $trump_rank && $cards_on_table[1]['type_arg'] == $trump_rank) {
-                $winning_player = $cards_on_table[1]['location_arg'];
+                $winning_player = $this->getActivePlayerId();
 
             // Single trump rank wins.
             } else if ($cards_on_table[0]['type_arg'] == $trump_rank) {
