@@ -840,16 +840,14 @@ class Vidrasso extends Table {
         } else if ($state_name == 'giftCard') {
             // Gift a random card
             $cards_in_hand = $this->deck->getPlayerHand($active_player);
-            $random_ix = bga_rand(0, count($cards_in_hand) - 1);
-            $keys = array_keys($cards_in_hand);
-            $card_id = $cards_in_hand[$keys[$random_ix]]['id'];
+            $random_key = array_rand($cards_in_hand);
+            $card_id = $cards_in_hand[$random_key]['id'];
             $this->giftCardFromPlayer($card_id, $active_player);
         } else if ($state_name == 'playerTurn') {
             // Play a random card
             $playable_cards = $this->getPlayableCards($active_player);
-            $random_ix = bga_rand(0, count($playable_cards) - 1);
-            $keys = array_keys($playable_cards);
-            $card_id = $playable_cards[$keys[$random_ix]]['id'];
+            $random_key = array_rand($playable_cards);
+            $card_id = $playable_cards[$random_key]['id'];
             $this->playCardFromPlayer($card_id, $active_player);
 
             // Next player
