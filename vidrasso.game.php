@@ -250,12 +250,13 @@ class Vidrasso extends Table {
             }
         }
 
-        // If this is a followed card, make sure it's in the led suit or a trump suit/rank.
-        // If not, make sure the player has no cards of the led suit.
         $led_suit = self::getGameStateValue('ledSuit');
         if ($led_suit == 0) {
             return $available_cards;
         }
+
+        // If this is a followed card, make sure it's in the led suit or a trump suit/rank.
+        // If not, make sure the player has no cards of the led suit.
         $trump_rank = $this->getGameStateValue('trumpRank');
         $trump_suit = $this->getGameStateValue('trumpSuit');
 
@@ -408,7 +409,7 @@ class Vidrasso extends Table {
         $this->playCardFromPlayer($card_id, $player_id);
 
         // Next player
-        $this->gamestate->nextState('');
+        $this->gamestate->nextState();
     }
 
     function playCardFromPlayer($card_id, $player_id) {
@@ -519,7 +520,7 @@ class Vidrasso extends Table {
 
         self::giveExtraTime(self::getActivePlayerId());
 
-        $this->gamestate->nextState('');
+        $this->gamestate->nextState();
     }
 
     function stMakeNextPlayerActive() {
@@ -534,7 +535,6 @@ class Vidrasso extends Table {
     }
 
     function stNewTrick() {
-        // New trick: Set active the player who wins the last trick, or the player who own the club-2 card
         self::setGameStateValue('ledSuit', 0);
         $this->gamestate->nextState();
     }
@@ -851,7 +851,7 @@ class Vidrasso extends Table {
             $this->playCardFromPlayer($card_id, $active_player);
 
             // Next player
-            $this->gamestate->nextState('');
+            $this->gamestate->nextState();
         }
     }
 
