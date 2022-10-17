@@ -38,8 +38,6 @@ class Vidrasso extends Table {
             'ledSuit' => 13,
             'firstPlayer' => 14,
             'firstPicker' => 15,
-            'player1UsedStrawmanPile' => 16,
-            'player2UsedStrawmanPile' => 17,
             'targetPoints' => 100,
         ]);
 
@@ -92,8 +90,6 @@ class Vidrasso extends Table {
 
         self::setGameStateInitialValue('trumpRank', 0);
         self::setGameStateInitialValue('trumpSuit', 0);
-        self::setGameStateInitialValue('player1UsedStrawmanPile', 0);
-        self::setGameStateInitialValue('player2UsedStrawmanPile', 0);
 
         // Init game statistics
         // (note: statistics are defined in your stats.inc.php file)
@@ -428,9 +424,8 @@ class Vidrasso extends Table {
 
         // Remember if the played card is a strawman
         if (substr($current_card['location'], 0, 5) == 'straw') {
-            self::setGameStateValue(
-                'player'.self::getPlayerNoById($player_id).'UsedStrawmanPile',
-                substr($current_card['location'], -1));
+            $pile = substr($current_card['location'], -1);
+            self::DbQuery("UPDATE player SET player_used_strawman = $pile WHERE player_id='$player_id'");
         }
 
         $this->deck->moveCard($card_id, 'cardsontable', $player_id);
@@ -614,36 +609,26 @@ class Vidrasso extends Table {
 
     function stRevealStrawmen() {
         // Check which piles are revealed and notify players
-        $player_strawman_use = [
-            1 => self::getGameStateValue('player1UsedStrawmanPile'),
-            2 => self::getGameStateValue('player2UsedStrawmanPile')
-        ];
+        $player_strawman_use = self::getCollectionFromDb(
+            'SELECT player_id, player_used_strawman FROM player where player_used_strawman > 0', true);
 
-        if ($player_strawman_use[1] || $player_strawman_use[2]) {
+        if ($player_strawman_use) {
             $revealed_cards_by_player = [];
-            $player_ids_by_no = [];
-            $players = self::loadPlayersBasicInfos();
-            foreach ($players as $player_id => $player) {
-                $player_ids_by_no[$player['player_no']] = $player_id;
-                $pile = $player_strawman_use[$player['player_no']];
-                if ($pile) {
-                    $remaining_cards_in_pile = $this->deck->getCardsInLocation("straw_{$player_id}_{$pile}", null, 'location_arg');
-                    if ($remaining_cards_in_pile) {
-                        $revealed_cards_by_player[$player_id] = [
-                            'pile' => $pile,
-                            'card' => array_shift($remaining_cards_in_pile),
-                        ];
-                    }
+            foreach ($player_strawman_use as $player_id => $pile) {
+                $remaining_cards_in_pile = $this->deck->getCardsInLocation("straw_{$player_id}_{$pile}", null, 'location_arg');
+                if ($remaining_cards_in_pile) {
+                    $revealed_cards_by_player[$player_id] = [
+                        'pile' => $pile,
+                        'card' => array_shift($remaining_cards_in_pile),
+                    ];
                 }
             }
 
-            self::dump('revealed_cards_by_player', $revealed_cards_by_player);
             self::notifyAllPlayers('revealStrawmen', '', [
                 'revealed_cards' => $revealed_cards_by_player,
             ]);
 
-            self::setGameStateValue('player1UsedStrawmanPile', 0);
-            self::setGameStateValue('player2UsedStrawmanPile', 0);
+            self::DbQuery('UPDATE player SET player_used_strawman = 0');
         }
 
         $remaining_card_count = self::getUniqueValueFromDB('select count(*) from card where card_location = "hand" or card_location like "straw%"');
