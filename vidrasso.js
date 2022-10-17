@@ -217,17 +217,12 @@ function (dojo, declare) {
                 document.getElementById('playertables').style.display = 'inline-block';
                 break;
 
-            // Unmark playable cards and active player
             case 'giftCard':
                 if (this.isSpectator) {
                     for (let handSize of Object.values(this.handSizes)) {
                         handSize.incValue(-1);
                     }
                 }
-                // Fallthrough!
-            case 'playerTurn':
-                document.querySelectorAll('#mystrawmen .playable, #myhand .playable').forEach(
-                    e => e.classList.remove('playable'));
                 break;
             }
         },
@@ -430,6 +425,11 @@ function (dojo, declare) {
                 this.ajaxAction('giftCard', {
                     id: card_id,
                     lock: true
+                },
+                () => {
+                    // Unmark playable cards and active player
+                    document.querySelectorAll('#mystrawmen .playable, #myhand .playable').forEach(
+                        e => e.classList.remove('playable'));
                 });
             } else {
                 this.playerHand.unselectAll();
@@ -579,6 +579,9 @@ function (dojo, declare) {
             // Mark the active player, in case this was an automated move (skipping playerTurn state)
             this.markActivePlayerTable(true, notif.args.player_id);
 
+            // Unmark playable cards
+            document.querySelectorAll('#mystrawmen .playable, #myhand .playable').forEach(
+                e => e.classList.remove('playable'));
             this.playCardOnTable(notif.args.player_id, notif.args.suit, notif.args.value, notif.args.card_id);
         },
 
