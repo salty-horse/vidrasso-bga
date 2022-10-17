@@ -56,10 +56,13 @@ function (dojo, declare) {
             console.log('gamedatas', gamedatas);
 
             // Set dynamic UI strings
-            let opponent = gamedatas.players[gamedatas.opponent_id];
-            document.querySelector('#opstrawmen_wrap > h3').innerHTML = dojo.string.substitute(
-                _("${player_name}'s strawmen"),
-                {player_name: `<span style="color:#${opponent.color}">${opponent.name}</span>`});
+            if (this.isSpectator) {
+                for (const player_info of Object.values(this.gamedatas.players)) {
+                    this.setStrawmanPlayerLabel(player_info);
+                }
+            } else {
+                this.setStrawmanPlayerLabel(gamedatas.players[gamedatas.opponent_id]);
+            }
 
             // Player hand
             this.playerHand = new ebg.stock();
@@ -216,6 +219,12 @@ function (dojo, declare) {
 
             // Unmark playable cards and active player
             case 'giftCard':
+                if (this.isSpectator) {
+                    for (let handSize of Object.values(this.handSizes)) {
+                        handSize.incValue(-1);
+                    }
+                }
+                // Fallthrough!
             case 'playerTurn':
                 document.querySelectorAll('#mystrawmen .playable, #myhand .playable').forEach(
                     e => e.classList.remove('playable'));
@@ -384,6 +393,12 @@ function (dojo, declare) {
             document.getElementById(`playertable_${player_id}`).classList.add('table_currentplayer')
         },
 
+        setStrawmanPlayerLabel: function(player_info) {
+            document.querySelector(`#player_${player_info.id}_strawmen_wrap > h3`).innerHTML = dojo.string.substitute(
+                _("${player_name}'s strawmen"),
+                {player_name: `<span style="color:#${player_info.color}">${player_info.name}</span>`});
+        },
+
         // /////////////////////////////////////////////////
         // // Player's action
 
@@ -494,7 +509,7 @@ function (dojo, declare) {
             dojo.subscribe('newScores', this, 'notif_newScores');
         },
 
-        notif_newHand: function(notif) {
+        notif_newHandPublic: function(notif) {
             document.getElementById('trump_rank').textContent = '?';
             let elem = document.getElementById('trump_suit');
             elem.textContent = '?';
@@ -508,19 +523,19 @@ function (dojo, declare) {
             }
 
             for (let handSize of Object.values(this.handSizes)) {
-                handSize.setValue(notif.args.hand_cards.length);
+                handSize.setValue(notif.args.hand_size);
             }
 
+            for (let player_id in notif.args.strawmen) {
+                this.initStrawmen(player_id, notif.args.strawmen[player_id]);
+            }
+        },
+
+        notif_newHand: function(notif) {
             // We received a new full hand of 13 cards.
             this.playerHand.removeAll();
 
             this.initPlayerHand(notif.args.hand_cards);
-        },
-
-        notif_newHandPublic: function(notif) {
-            for (let player_id in notif.args.strawmen) {
-                this.initStrawmen(player_id, notif.args.strawmen[player_id]);
-            }
         },
 
         notif_selectTrumpRank: function(notif) {

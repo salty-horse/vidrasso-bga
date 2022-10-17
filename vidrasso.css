@@ -7,17 +7,13 @@
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
  *
- * heartsla.css
- *
- * template stylesheet
- *
  */
 
 /*
     This is the CSS stylesheet of your game User Interface.
 
     Styles defined on this file will be applied to the HTML elements you define in your
-    HTML template (heartsla_heartsla.tpl), and to HTML elements you create dynamically
+    HTML template (template.tpl), and to HTML elements you create dynamically
     (in template.js).
 
     Usually, you are using CSS to:
@@ -178,6 +174,10 @@
     left: -2px;
     border-radius: 25%;
     box-shadow: 1px 1px 1px 1px black;
+}
+
+.spectatorMode #myhand_wrap {
+    display: none;
 }
 
 .cardontable {

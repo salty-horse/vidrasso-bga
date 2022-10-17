@@ -25,14 +25,14 @@
     Please REMOVE this comment before publishing your game on BGA
 -->
 
-<div id="opstrawmen_wrap" class="whiteblock">
+<div id="player_{TOP_PLAYER_ID}_strawmen_wrap" class="whiteblock">
     <h3>Opponent's strawmen</h3>
-    <div id="opstrawmen">
-        <div class="straw" id="playerstraw_{OP_PLAYER_ID}_1"></div>
-        <div class="straw" id="playerstraw_{OP_PLAYER_ID}_2"></div>
-        <div class="straw" id="playerstraw_{OP_PLAYER_ID}_3"></div>
-        <div class="straw" id="playerstraw_{OP_PLAYER_ID}_4"></div>
-        <div class="straw" id="playerstraw_{OP_PLAYER_ID}_5"></div>
+    <div>
+        <div class="straw" id="playerstraw_{TOP_PLAYER_ID}_1"></div>
+        <div class="straw" id="playerstraw_{TOP_PLAYER_ID}_2"></div>
+        <div class="straw" id="playerstraw_{TOP_PLAYER_ID}_3"></div>
+        <div class="straw" id="playerstraw_{TOP_PLAYER_ID}_4"></div>
+        <div class="straw" id="playerstraw_{TOP_PLAYER_ID}_5"></div>
     </div>
 </div>
 
@@ -86,14 +86,14 @@
 
 </div>
 
-<div id="mystrawmen_wrap" class="whiteblock">
+<div id="player_{BOTTOM_PLAYER_ID}_strawmen_wrap" class="whiteblock">
     <h3>{MY_STRAWMEN}</h3>
     <div id="mystrawmen">
-        <div class="straw" id="playerstraw_{MY_PLAYER_ID}_1"></div>
-        <div class="straw" id="playerstraw_{MY_PLAYER_ID}_2"></div>
-        <div class="straw" id="playerstraw_{MY_PLAYER_ID}_3"></div>
-        <div class="straw" id="playerstraw_{MY_PLAYER_ID}_4"></div>
-        <div class="straw" id="playerstraw_{MY_PLAYER_ID}_5"></div>
+        <div class="straw" id="playerstraw_{BOTTOM_PLAYER_ID}_1"></div>
+        <div class="straw" id="playerstraw_{BOTTOM_PLAYER_ID}_2"></div>
+        <div class="straw" id="playerstraw_{BOTTOM_PLAYER_ID}_3"></div>
+        <div class="straw" id="playerstraw_{BOTTOM_PLAYER_ID}_4"></div>
+        <div class="straw" id="playerstraw_{BOTTOM_PLAYER_ID}_5"></div>
     </div>
 </div>
 <div id="myhand_wrap" class="whiteblock">

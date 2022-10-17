@@ -38,7 +38,15 @@ class view_vidrasso_vidrasso extends game_view {
         $template = self::getGameName() . '_' . self::getGameName();
 
         global $g_user;
-        $current_player_id = $g_user->get_id();
+        if ($this->game->isSpectator()) {
+            $player_ids = array_keys($players);
+            $current_player_id = $player_ids[0];
+            $this->tpl['TOP_PLAYER_ID'] = $player_ids[0];
+            $this->tpl['BOTTOM_PLAYER_ID'] = $player_ids[1];
+        } else {
+            $current_player_id = $g_user->get_id();
+            $this->tpl['BOTTOM_PLAYER_ID'] = $current_player_id;
+        }
         
         $this->page->begin_block($template, 'player');
         foreach ($players as $player_id => $info) {
@@ -49,12 +57,12 @@ class view_vidrasso_vidrasso extends game_view {
                 'PLAYER_COLOR' => $players[$player_id]['player_color'],
                 'DIR' => $dir
             ]);
-            if ($player_id != $current_player_id) {
-                $this->tpl['OP_PLAYER_ID'] = $player_id;
+
+            if (!$this->game->isSpectator() && $player_id != $current_player_id) {
+                $this->tpl['TOP_PLAYER_ID'] = $player_id;
             }
         }
         
-        $this->tpl['MY_PLAYER_ID'] = $current_player_id;
         $this->tpl['MY_HAND'] = self::_('My hand');
         $this->tpl['MY_STRAWMEN'] = self::_('My strawmen');
         $this->tpl['TRUMP_RANK'] = self::_('Trump rank');

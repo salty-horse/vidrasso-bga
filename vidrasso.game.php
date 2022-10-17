@@ -516,6 +516,7 @@ class Vidrasso extends Table {
         // Notify both players about the public strawmen, first player, and first picker
         self::notifyAllPlayers('newHandPublic', '', [
             'strawmen' => $public_strawmen,
+            'hand_size' => 8,
         ]);
 
         self::giveExtraTime(self::getActivePlayerId());
