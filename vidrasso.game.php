@@ -464,12 +464,11 @@ class Vidrasso extends Table {
     }
 
     function argPlayCard() {
-        $player_id = self::getActivePlayerId();
-        $available_cards = $this->getPlayableCards(self::getActivePlayerId());
+        $playable_cards = $this->getPlayableCards(self::getActivePlayerId());
         return [
             '_private' => [
                 'active' => [
-                    'playable_cards' => array_keys($available_cards),
+                    'playable_cards' => array_keys($playable_cards),
                 ],
             ],
         ];
@@ -522,7 +521,7 @@ class Vidrasso extends Table {
     function stMakeNextPlayerActive() {
         $player_id = $this->activeNextPlayer();
         self::giveExtraTime($player_id);
-        $this->gamestate->nextState('');
+        $this->gamestate->nextState();
     }
 
     function stFirstTrick() {
@@ -610,7 +609,7 @@ class Vidrasso extends Table {
     function stRevealStrawmen() {
         // Check which piles are revealed and notify players
         $player_strawman_use = self::getCollectionFromDb(
-            'SELECT player_id, player_used_strawman FROM player where player_used_strawman > 0', true);
+            'SELECT player_id, player_used_strawman FROM player WHERE player_used_strawman > 0', true);
 
         if ($player_strawman_use) {
             $revealed_cards_by_player = [];
