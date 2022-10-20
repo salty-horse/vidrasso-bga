@@ -423,13 +423,11 @@ function (dojo, declare) {
                 var card_id = items[0].id;
                 this.ajaxAction('playCard', {
                     id: card_id,
-                    lock: true
                 });
             } else if (this.checkAction('giftCard')) {
                 var card_id = items[0].id;
                 this.ajaxAction('giftCard', {
                     id: card_id,
-                    lock: true
                 });
             } else {
                 this.playerHand.unselectAll();
@@ -449,7 +447,6 @@ function (dojo, declare) {
 
             this.ajaxAction('playCard', {
                 id: card_id,
-                lock: true
             });
         },
 
