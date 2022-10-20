@@ -182,11 +182,11 @@ function (dojo, declare) {
             // Mark playable cards
             case 'playerTurn':
                 this.markActivePlayerTable(true);
-                if (!this.isCurrentPlayerActive()) {
-                    document.querySelectorAll('#mystrawmen .playable, #myhand .playable').forEach(
-                        e => e.classList.remove('playable'));
+
+                if (!this.isCurrentPlayerActive())
                     break;
-                }
+
+                // Highlight playable cards
                 for (let card_id of args.args._private.playable_cards) {
                     let elem = document.getElementById(`myhand_item_${card_id}`);
                     // Look for strawman
@@ -388,6 +388,11 @@ function (dojo, declare) {
             document.getElementById(`playertable_${player_id}`).classList.add('table_currentplayer')
         },
 
+        unmarkPlayableCards: function() {
+            document.querySelectorAll('#mystrawmen .playable, #myhand .playable').forEach(
+                e => e.classList.remove('playable'));
+        },
+
         setStrawmanPlayerLabel: function(player_info) {
             document.querySelector(`#player_${player_info.id}_strawmen_wrap > h3`).innerHTML = dojo.string.substitute(
                 _("${player_name}'s strawmen"),
@@ -425,11 +430,6 @@ function (dojo, declare) {
                 this.ajaxAction('giftCard', {
                     id: card_id,
                     lock: true
-                },
-                () => {
-                    // Unmark playable cards and active player
-                    document.querySelectorAll('#mystrawmen .playable, #myhand .playable').forEach(
-                        e => e.classList.remove('playable'));
                 });
             } else {
                 this.playerHand.unselectAll();
@@ -567,6 +567,8 @@ function (dojo, declare) {
         },
 
         notif_giftCard: function(notif) {
+            this.unmarkPlayableCards();
+
             this.playerHand.removeFromStockById(notif.args.card);
 
             // Decrease hand size of both players, even though one of them may still be thinking
@@ -578,10 +580,7 @@ function (dojo, declare) {
         notif_playCard: function(notif) {
             // Mark the active player, in case this was an automated move (skipping playerTurn state)
             this.markActivePlayerTable(true, notif.args.player_id);
-
-            // Unmark playable cards
-            document.querySelectorAll('#mystrawmen .playable, #myhand .playable').forEach(
-                e => e.classList.remove('playable'));
+            this.unmarkPlayableCards();
             this.playCardOnTable(notif.args.player_id, notif.args.suit, notif.args.value, notif.args.card_id);
         },
 
