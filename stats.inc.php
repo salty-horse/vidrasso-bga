@@ -65,7 +65,7 @@ $stats_type = [
     'player' => [
         'won_tricks' => [
             'id' => 10,
-            'name' => totranslate('Won tricks'),
+            'name' => totranslate('Tricks won'),
             'type' => 'int'
         ],
         'average_points_per_trick' => [
@@ -73,15 +73,16 @@ $stats_type = [
             'name' => totranslate('Average points per trick'),
             'type' => 'float'
         ],
-        'number_of_trumps_dealt' => [
+        'number_of_trumps_played' => [
             'id' => 12,
-            'name' => totranslate('Number of trumps dealt'),
+            'name' => totranslate('Trumps played'),
             'type' => 'int'
         ],
-        'win_all_tricks_in_round' => [
-            'id' => 13,
-            'name' => totranslate('Win all tricks in a round'),
-            'type' => 'int'
-        ],
+        // Unused
+        // 'win_all_tricks_in_round' => [
+        //     'id' => 13,
+        //     'name' => totranslate('Won all tricks in a round'),
+        //     'type' => 'int'
+        // ],
     ]
 ];

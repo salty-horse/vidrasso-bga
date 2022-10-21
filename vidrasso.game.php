@@ -76,8 +76,7 @@ class Vidrasso extends Table {
             // Player statistics
             $this->initStat('player', 'won_tricks', 0, $player_id);
             $this->initStat('player', 'average_points_per_trick', 0, $player_id);
-            $this->initStat('player', 'number_of_trumps_dealt', 0, $player_id);
-            $this->initStat('player', 'win_all_tricks_in_round', 0, $player_id);
+            $this->initStat('player', 'number_of_trumps_played', 0, $player_id);
         }
         $sql .= implode($values, ',');
         self::DbQuery($sql);
@@ -367,19 +366,6 @@ class Vidrasso extends Table {
         }
 
         if ($trump_rank && $trump_suit) {
-            // Update hand statistics
-            foreach ($players as $player_id => $player) {
-                // Count all player cards that match the trump suit or trump rank
-                $trump_count = self::getUniqueValueFromDB(
-                    "select count(*) from card " .
-                    "where (card_type = '$trump_suit' or card_type_arg = $trump_rank) and " .
-                    "((card_location = 'hand' and card_location_arg = '$player_id') or " .
-                    "card_location like 'straw_${player_id}_%')");
-                self::DbQuery(
-                    "UPDATE player SET player_number_of_trumps_dealt = player_number_of_trumps_dealt + $trump_count " .
-                    "WHERE player_id = $player_id");
-            }
-
             $this->gamestate->nextState('giftCard');
         } else {
             $this->gamestate->nextState('selectOtherTrump');
@@ -529,6 +515,24 @@ class Vidrasso extends Table {
 
     function stFirstTrick() {
         $this->gamestate->changeActivePlayer($this->getGameStateValue('firstPlayer'));
+
+        // Update hand statistics
+        $trump_suit = $this->getGameStateValue('trumpSuit');
+        $trump_rank = $this->getGameStateValue('trumpRank');
+        $players = self::loadPlayersBasicInfos();
+        foreach ($players as $player_id => $player) {
+            // Count all player cards that match the trump suit or trump rank
+            $trump_count = self::getUniqueValueFromDB(
+                "select count(*) from card " .
+                "where (card_type = '$trump_suit' or card_type_arg = $trump_rank) and " .
+                "((card_location = 'hand' and card_location_arg = '$player_id') or " .
+                "card_location like 'straw_${player_id}_%')");
+            self::DbQuery(
+                "UPDATE player SET player_number_of_trumps_dealt = player_number_of_trumps_dealt + $trump_count " .
+                "WHERE player_id = $player_id");
+        }
+
+
         $this->gamestate->nextState();
     }
 
@@ -669,9 +673,6 @@ class Vidrasso extends Table {
             ]);
 
             $this->incStat($score_pile['won_tricks'], 'won_tricks', $player_id);
-            if ($score_pile['won_tricks'] == 17) {
-                $this->incStat(1, 'win_all_tricks_in_round', $player_id);
-            }
 
             // This stores the total score minus gift cards, used for calculating average_points_per_trick
             self::DbQuery(
@@ -755,7 +756,7 @@ class Vidrasso extends Table {
             foreach ($players as $player_id => $player) {
                 $won_tricks = $this->getStat('won_tricks', $player_id);
                 $this->setStat($player_stats[$player_id]['points'] / $won_tricks, 'average_points_per_trick', $player_id);
-                $this->setStat($player_stats[$player_id]['trumps'], 'number_of_trumps_dealt', $player_id);
+                $this->setStat($player_stats[$player_id]['trumps'], 'number_of_trumps_played', $player_id);
             }
 
             $this->gamestate->nextState('endGame');
