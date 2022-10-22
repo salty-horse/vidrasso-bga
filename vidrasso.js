@@ -85,6 +85,9 @@ function (dojo, declare) {
                 }
             }
 
+            // Used for changing trump graphics
+            this.visibleCards = {};
+
             // Cards in player's hand
             this.initPlayerHand(this.gamedatas.hand);
 
@@ -123,15 +126,19 @@ function (dojo, declare) {
                 this.putCardOnTable(player_id, color, value, card.id);
             }
 
+            if (this.gamedatas.trumpRank != '0' || this.gamedatas.trumpSuit != '0') {
+                this.markTrumps();
+            }
+
             let elem = document.getElementById('trump_rank');
-            if (this.gamedatas.trumpRank != "0") {
+            if (this.gamedatas.trumpRank != '0') {
                 elem.textContent = this.gamedatas.trumpRank;
             } else {
                 elem.textContent = '?';
             }
 
             elem = document.getElementById('trump_suit');
-            if (this.gamedatas.trumpSuit != "0") {
+            if (this.gamedatas.trumpSuit != '0') {
                 elem.className = `trump_indicator suit_icon_${this.gamedatas.trumpSuit}`;
             } else {
                 elem.textContent = '?';
@@ -285,9 +292,15 @@ function (dojo, declare) {
         },
 
         getCardSpriteXY: function(suit, rank) {
+            let modifier = 0;
+            if (rank == this.gamedatas.trumpRank) {
+                modifier = 800;
+            } else if (suit == this.gamedatas.trumpSuit) {
+                modifier = 400;
+            }
             return {
-                x: this.cardWidth * (rank - 1),
-                y: this.cardHeight * (suit - 1),
+                x: 100 * (rank - 1),
+                y: 100 * (suit - 1) + modifier,
             }
         },
 
@@ -297,6 +310,7 @@ function (dojo, declare) {
                 let suit = card.type;
                 let rank = card.type_arg;
                 this.playerHand.addToStockWithId(this.getCardUniqueId(suit, rank), card.id);
+                this.visibleCards[`${suit},${rank}`] = this.playerHand.getItemDivId(card.id);
             }
         },
 
@@ -304,6 +318,7 @@ function (dojo, declare) {
             for (const [ix, straw] of visible_strawmen.entries()) {
                 if (!straw) continue;
                 this.setStrawman(player_id, ix + 1, straw.type, straw.type_arg, straw.id);
+                this.visibleCards[`${straw.type},${straw.type_arg}`] = `straw_${player_id}_${ix + 1}`;
                 if (!more_strawmen || more_strawmen[ix]) {
                     let more = document.createElement('div');
                     more.className = 'straw_more';
@@ -397,6 +412,37 @@ function (dojo, declare) {
             document.querySelector(`#player_${player_info.id}_strawmen_wrap > h3`).innerHTML = dojo.string.substitute(
                 _("${player_name}'s strawmen"),
                 {player_name: `<span style="color:#${player_info.color}">${player_info.name}</span>`});
+        },
+
+        // Change the graphics of the trump cards and reorder player hand
+        markTrumps: function() {
+            for (let [key, div_id] of Object.entries(this.visibleCards)) {
+                let [suit, rank] = key.split(',');
+                if (rank == this.gamedatas.trumpRank || suit == this.gamedatas.trumpSuit) {
+                    let elem = document.getElementById(div_id);
+                    if (elem) {
+                        let coords = this.getCardSpriteXY(suit, rank);
+                        elem.style['background-position'] = `-${coords.x}% -${coords.y}%`;
+                    }
+                }
+            }
+
+            let weights = {}
+            for (let suit = 1; suit <= 4; suit++) {
+                for (let rank = 1; rank <= 9; rank++) {
+                    // Build card type id
+                    let card_type_id = this.getCardUniqueId(suit, rank);
+
+                    if (rank == this.gamedatas.trumpRank) {
+                        weights[card_type_id] = -1000 + card_type_id;
+                    } else if (suit == this.gamedatas.trumpSuit) {
+                        weights[card_type_id] = -100 + card_type_id;
+                    } else {
+                        weights[card_type_id] = card_type_id;
+                    }
+                }
+            }
+            this.playerHand.changeItemsWeight(weights);
         },
 
         // /////////////////////////////////////////////////
@@ -514,6 +560,8 @@ function (dojo, declare) {
             this.gamedatas.trumpRank = '0';
             this.gamedatas.trumpSuit = '0';
 
+            this.markTrumps();
+
             // Reset scores and hand size
             for (let scorePile of Object.values(this.scorePiles)) {
                 scorePile.setValue(0);
@@ -532,6 +580,7 @@ function (dojo, declare) {
             // We received a new full hand of 13 cards.
             this.playerHand.removeAll();
 
+            this.visibleCards = {};
             this.initPlayerHand(notif.args.hand_cards);
         },
 
@@ -547,6 +596,8 @@ function (dojo, declare) {
                 elem.textContent = '?';
                 elem.style.display = 'block';
             }
+
+            this.markTrumps();
         },
 
         notif_selectTrumpSuit: function(notif) {
@@ -561,6 +612,8 @@ function (dojo, declare) {
             if (elem.style.display == 'none') {
                 elem.style.display = 'block';
             }
+
+            this.markTrumps();
         },
 
         notif_giftCard: function(notif) {
