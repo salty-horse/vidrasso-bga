@@ -560,6 +560,12 @@ function (dojo, declare) {
             this.gamedatas.trumpRank = '0';
             this.gamedatas.trumpSuit = '0';
 
+            // The spectator doesn't get the private newHand notification
+            if (this.isSpectator) {
+                this.visibleCards = {};
+            }
+
+            // Reset sorting order
             this.markTrumps();
 
             // Reset scores and hand size
