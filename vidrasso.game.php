@@ -681,15 +681,14 @@ class Vidrasso extends Table {
         }
 
         $new_scores = self::getCollectionFromDb('SELECT player_id, player_score FROM player', true);
+        $flat_scores = array_values($new_scores);
         self::notifyAllPlayers('newScores', '', ['newScores' => $new_scores]);
 
         // Check if this is the end of the game
         $end_of_game = false;
         $target_points = $this->getGameStateValue('targetPoints');
-        foreach ($new_scores as $player_id => $score) {
-            if ($score >= $target_points) {
-                $end_of_game = true;
-            }
+        if (($flat_scores[0] >= $target_points || $flat_scores[1] >= $target_points) && $flat_scores[0] != $flat_scores[1]) {
+            $end_of_game = true;
         }
 
         // Display a score table
@@ -774,7 +773,6 @@ class Vidrasso extends Table {
             self::getPlayerAfter(self::getGameStateValue('firstPlayer')));
 
         // Choose new first picker
-        $flat_scores = array_values($new_scores);
         if ($flat_scores[0] == $flat_scores[1]) {
             // Rare case when players are tied: Alternate first picker
             $first_picker = self::getPlayerAfter(self::getGameStateValue('firstPicker'));
