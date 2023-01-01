@@ -227,6 +227,15 @@ class Vidrasso extends Table {
         });
     }
 
+
+    // Returns all cards for a player, in hand or in strawman piles
+    function getAllPlayerCards($player_id) {
+        return self::getCollectionFromDB(
+            "select card_id id, card_type type, card_type_arg type_arg from card " .
+            "where (card_location = 'hand' and card_location_arg = '$player_id') or " .
+            "card_location like 'straw_${player_id}_%'");
+    }
+
     function getCardStrength($card, $trump_suit, $led_suit) {
         $value = 10 - $card['type_arg'];
         if ($card['type'] == $trump_suit) {
@@ -234,6 +243,17 @@ class Vidrasso extends Table {
         }
         if ($card['type'] == $led_suit) {
             $value += 50;
+        }
+        return $value;
+    }
+
+    function getCardStrengthStatistic($card, $trump_suit, $trump_rank) {
+        if ($card['type_arg'] == $trump_rank) {
+            return 100;
+        }
+        $value = 10 - $card['type_arg'];
+        if ($card['type'] == $trump_suit) {
+            return $value * 10;
         }
         return $value;
     }
@@ -531,8 +551,20 @@ class Vidrasso extends Table {
                 "where (card_type = '$trump_suit' or card_type_arg = $trump_rank) and " .
                 "((card_location = 'hand' and card_location_arg = '$player_id') or " .
                 "card_location like 'straw_${player_id}_%')");
+
+            // Calculate hand strength
+            $cards_of_player = $this->getAllPlayerCards($player_id);
+            $strength = 0;
+            foreach ($cards_of_player as $card) {
+                $strength += $this->getCardStrengthStatistic($card, $trump_suit, $trump_rank);
+            }
+
             self::DbQuery(
-                "UPDATE player SET player_number_of_trumps_dealt = player_number_of_trumps_dealt + $trump_count " .
+                "UPDATE player " .
+                "SET player_number_of_trumps_played = player_number_of_trumps_played + $trump_count ," .
+                "player_number_of_trumps_played_round = $trump_count ," .
+                "player_hand_strength = player_hand_strength + $strength ," .
+                "player_hand_strength_round = $strength " .
                 "WHERE player_id = $player_id");
         }
 
@@ -695,6 +727,15 @@ class Vidrasso extends Table {
             $end_of_game = true;
         }
 
+        $player_stats = self::getCollectionFromDb(
+            'SELECT player_id, ' .
+            'player_total_score_pile points, ' .
+            'player_number_of_trumps_played trumps, ' .
+            'player_number_of_trumps_played_round trumps_round, ' .
+            'player_hand_strength strength, ' .
+            'player_hand_strength_round strength_round ' .
+            'FROM player');
+
         // Display a score table
         $scoreTable = [];
         $row = [''];
@@ -732,6 +773,18 @@ class Vidrasso extends Table {
         }
         $scoreTable[] = $row;
 
+        $row = [clienttranslate('Trumps Played')];
+        foreach ($players as $player_id => $player) {
+            $row[] = $player_stats[$player_id]['trumps_round'];
+        }
+        $scoreTable[] = $row;
+
+        $row = [clienttranslate('Hand Strength')];
+        foreach ($players as $player_id => $player) {
+            $row[] = $player_stats[$player_id]['strength_round'];
+        }
+        $scoreTable[] = $row;
+
         // Add separator before current total score
         $row = [''];
         foreach ($players as $player_id => $player) {
@@ -754,12 +807,11 @@ class Vidrasso extends Table {
 
         if ($end_of_game) {
             // Update statistics
-            $player_stats = self::getCollectionFromDb(
-                'SELECT player_id, player_total_score_pile points, player_number_of_trumps_dealt trumps FROM player');
             foreach ($players as $player_id => $player) {
                 $won_tricks = $this->getStat('won_tricks', $player_id);
                 $this->setStat($player_stats[$player_id]['points'] / $won_tricks, 'average_points_per_trick', $player_id);
                 $this->setStat($player_stats[$player_id]['trumps'], 'number_of_trumps_played', $player_id);
+                $this->setStat($player_stats[$player_id]['strength'], 'total_hand_strength', $player_id);
             }
 
             $this->gamestate->nextState('endGame');
