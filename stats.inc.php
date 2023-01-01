@@ -75,14 +75,13 @@ $stats_type = [
         ],
         'number_of_trumps_played' => [
             'id' => 12,
-            'name' => totranslate('Trumps played'),
+            'name' => totranslate('Total trumps played'),
             'type' => 'int'
         ],
-        // Unused
-        // 'win_all_tricks_in_round' => [
-        //     'id' => 13,
-        //     'name' => totranslate('Won all tricks in a round'),
-        //     'type' => 'int'
-        // ],
+        'total_hand_strength' => [
+            'id' => 13,
+            'name' => totranslate('Total hand strength'),
+            'type' => 'int'
+        ],
     ]
 ];
