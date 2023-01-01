@@ -180,10 +180,12 @@ function (dojo, declare) {
                 }
                 break;
 
-            // Mark hand cards
+            // Mark hand cards if player hasn't gifted yet
             case 'giftCard':
-                document.querySelectorAll('#myhand .stockitem').forEach(
-                    e => e.classList.add('playable'));
+                if (this.playerHand.count() == 8) {
+                    document.querySelectorAll('#myhand .stockitem').forEach(
+                        e => e.classList.add('playable'));
+                }
                 break;
 
             // Mark playable cards
@@ -222,14 +224,6 @@ function (dojo, declare) {
                 document.getElementById('rankSelector').style.display = 'none';
                 document.getElementById('suitSelector').style.display = 'none';
                 document.getElementById('playertables').style.display = 'inline-block';
-                break;
-
-            case 'giftCard':
-                if (this.isSpectator) {
-                    for (let handSize of Object.values(this.handSizes)) {
-                        handSize.incValue(-1);
-                    }
-                }
                 break;
             }
         },
@@ -541,6 +535,7 @@ function (dojo, declare) {
             dojo.subscribe('newHandPublic', this, 'notif_newHandPublic');
             dojo.subscribe('selectTrumpRank', this, 'notif_selectTrumpRank');
             dojo.subscribe('selectTrumpSuit', this, 'notif_selectTrumpSuit');
+            dojo.subscribe('giftCardPrivate', this, 'notif_giftCardPrivate');
             dojo.subscribe('giftCard', this, 'notif_giftCard');
             dojo.subscribe('playCard', this, 'notif_playCard');
             this.notifqueue.setSynchronous('playCard', 1000);
@@ -622,15 +617,16 @@ function (dojo, declare) {
             this.markTrumps();
         },
 
-        notif_giftCard: function(notif) {
+        notif_giftCardPrivate: function(notif) {
             this.unmarkPlayableCards();
 
             this.playerHand.removeFromStockById(notif.args.card);
 
-            // Decrease hand size of both players, even though one of them may still be thinking
-            for (let handSize of Object.values(this.handSizes)) {
-                handSize.incValue(-1);
-            }
+            // Hand size is decreased in notif_giftCard
+        },
+
+        notif_giftCard: function(notif) {
+            this.handSizes[notif.args.player_id].incValue(-1);
         },
 
         notif_playCard: function(notif) {

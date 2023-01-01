@@ -384,7 +384,10 @@ class Vidrasso extends Table {
             throw new BgaUserException(self::_('You do not have this card'));
         }
         $this->deck->moveCard($card_id, 'gift', self::getPlayerAfter($player_id));
-        self::notifyPlayer($player_id, 'giftCard', '', ['card' => $card_id]);
+        self::notifyPlayer($player_id, 'giftCardPrivate', '', ['card' => $card_id]);
+        self::notifyAllPlayers('giftCard', clienttranslate('${player_name} selected a card to gift'), [
+            'player_id' => $player_id,
+            'player_name' => self::getActivePlayerName() ]);
         $this->gamestate->setPlayerNonMultiactive($player_id, '');
     }
 
@@ -421,7 +424,8 @@ class Vidrasso extends Table {
         if (self::getGameStateValue('ledSuit') == 0)
             self::setGameStateValue('ledSuit', $current_card['type']);
         self::notifyAllPlayers('playCard', clienttranslate('${player_name} plays ${value} ${suit_displayed}'), [
-            'card_id' => $card_id,'player_id' => $player_id,
+            'card_id' => $card_id,
+            'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
             'value' => $current_card['type_arg'],
             'suit' => $current_card['type'],
