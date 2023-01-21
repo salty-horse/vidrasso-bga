@@ -387,7 +387,7 @@ class Vidrasso extends Table {
         self::notifyPlayer($player_id, 'giftCardPrivate', '', ['card' => $card_id]);
         self::notifyAllPlayers('giftCard', clienttranslate('${player_name} selected a card to gift'), [
             'player_id' => $player_id,
-            'player_name' => self::getActivePlayerName() ]);
+            'player_name' => self::getPlayerNameById($player_id) ]);
         $this->gamestate->setPlayerNonMultiactive($player_id, '');
     }
 
