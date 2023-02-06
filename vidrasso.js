@@ -180,14 +180,6 @@ function (dojo, declare) {
                 }
                 break;
 
-            // Mark hand cards if player hasn't gifted yet
-            case 'giftCard':
-                if (this.playerHand.count() == 8) {
-                    document.querySelectorAll('#myhand .stockitem').forEach(
-                        e => e.classList.add('playable'));
-                }
-                break;
-
             // Mark playable cards
             case 'playerTurn':
                 this.markActivePlayerTable(true);
@@ -233,24 +225,15 @@ function (dojo, declare) {
         //
         onUpdateActionButtons: function(stateName, args)
         {
-            if(this.isCurrentPlayerActive())
-            {
-                switch(stateName)
-                {
-/*
-                 Example:
-
-                 case 'myGameState':
-
-                    // Add 3 action buttons in the action status bar:
-
-                    this.addActionButton('button_1_id', _('Button 1 label'), 'onMyMethodToCall1');
-                    this.addActionButton('button_2_id', _('Button 2 label'), 'onMyMethodToCall2');
-                    this.addActionButton('button_3_id', _('Button 3 label'), 'onMyMethodToCall3');
-                    break;
-*/
-                }
-            }
+            if (this.isCurrentPlayerActive()) {
+                switch(stateName) {
+				// Mark hand cards if player hasn't gifted yet
+				case 'giftCard':
+					document.querySelectorAll('#myhand .stockitem').forEach(
+						e => e.classList.add('playable'));
+					break;
+				}
+			}
         },
 
         ///////////////////////////////////////////////////
