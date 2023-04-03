@@ -30,12 +30,19 @@ function (dojo, declare) {
             this.cardWidth = 93;
             this.cardHeight = 93;
 
-            this.suitSymbols = {
-                1: {text: '♠', color: 'black'},
-                2: {text: '♥', color: 'red'},
-                3: {text: '♣', color: 'black'},
-                4: {text: '♦', color: 'red'},
-            }
+            this.suitNames = {
+                1: _('spades'),
+                2: _('hearts'),
+                3: _('clubs'),
+                4: _('diamonds'),
+            };
+
+            this.suitSymbolToId = {
+                '♠': 1,
+                '♥': 2,
+                '♣': 3,
+                '♦': 4,
+            };
         },
 
         /*
@@ -140,6 +147,7 @@ function (dojo, declare) {
             elem = document.getElementById('trump_suit');
             if (this.gamedatas.trumpSuit != '0') {
                 elem.className = `trump_indicator suit_icon_${this.gamedatas.trumpSuit}`;
+                elem.title = elem['aria-label'] = this.suitNames[this.gamedatas.trumpSuit];
             } else {
                 elem.textContent = '?';
                 elem.className = 'trump_indicator';
@@ -262,6 +270,32 @@ function (dojo, declare) {
 
             let name = this.game_name;
             this.ajaxcall(`/vidrasso/vidrasso/${action}.html`, args, this, func, err);
+        },
+
+        /** Override this function to inject html for log items  */
+
+        /* @Override */
+        format_string_recursive: function (log, args) {
+            try {
+                if (log && args && !args.processed) {
+                    args.processed = true;
+
+                    for (let key in args) {
+                        if (args[key] && typeof args[key] == 'string' && key == 'suit') {
+                            args[key] = this.getSuitDiv(args[key]);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error(log, args, "Exception thrown", e.stack);
+            }
+            return this.inherited(this.format_string_recursive, arguments);
+        },
+
+        getSuitDiv: function (suit_symbol) {
+            let suit_id = this.suitSymbolToId[suit_symbol];
+            let suit_name = this.suitNames[suit_id];
+            return `<div role=\"img\" title=\"${suit_name}\" aria-label=\"${suit_name}\" class=\"log_suit suit_icon_${suit_id}\"></div>`;
         },
 
         getCardUniqueId: function(suit, rank) {
@@ -590,6 +624,7 @@ function (dojo, declare) {
             elem.style.display = 'block';
             elem.textContent = '';
             elem.className = `trump_indicator suit_icon_${this.gamedatas.trumpSuit}`;
+            elem.title = elem['aria-label'] = this.suitNames[this.gamedatas.trumpSuit];
             document.getElementById('suitSelector').style.display = 'none';
 
             elem = document.getElementById('trump_rank');
@@ -616,7 +651,7 @@ function (dojo, declare) {
             // Mark the active player, in case this was an automated move (skipping playerTurn state)
             this.markActivePlayerTable(true, notif.args.player_id);
             this.unmarkPlayableCards();
-            this.playCardOnTable(notif.args.player_id, notif.args.suit, notif.args.value, notif.args.card_id);
+            this.playCardOnTable(notif.args.player_id, notif.args.suit_id, notif.args.value, notif.args.card_id);
         },
 
         notif_revealStrawmen: function(notif) {

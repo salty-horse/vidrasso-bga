@@ -19,13 +19,6 @@
  *
  */
 
-$this->suits = [
-    1 => ['name' => clienttranslate('spades')],
-    2 => ['name' => clienttranslate('hearts')],
-    3 => ['name' => clienttranslate('clubs')],
-    4 => ['name' => clienttranslate('diamonds')]
-];
-
 $this->values_label = [
     1 => '1',
     2 => '2',

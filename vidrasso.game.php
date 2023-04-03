@@ -95,7 +95,7 @@ class Vidrasso extends Table {
 
         // Create cards
         $cards = [];
-        foreach ($this->suits as $suit_id => $suit) {
+        for ($suit_id = 1; $suit_id <= 4; $suit_id++) {
             for ($value = 1; $value <= 9; $value++) {
                 $cards[] = ['type' => $suit_id, 'type_arg' => $value, 'nbr' => 1];
             }
@@ -338,9 +338,9 @@ class Vidrasso extends Table {
         return $result;
     }
 
-    function formatSuitText($suit_id) {
-        $suit_name = $this->suits[$suit_id]['name'];
-        return "<div role=\"img\" title=\"$suit_name\" aria-label=\"$suit_name\" class=\"log_suit suit_icon_$suit_id\"></div>";
+    const SUIT_SYMBOLS = ['♠', '♥', '♣', '♦'];
+    function getSuitLogName($suit_id) {
+        return self::SUIT_SYMBOLS[$suit_id - 1];
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -380,7 +380,7 @@ class Vidrasso extends Table {
             self::notifyAllPlayers('selectTrumpSuit', clienttranslate('${player_name} selects ${suit} as the trump suit'), [
                 'player_id' => $player_id,
                 'player_name' => $players[$player_id]['player_name'],
-                'suit' => $this->formatSuitText($trump_id),
+                'suit' => $this->getSuitLogName($trump_id),
                 'suit_id' => $trump_id,
             ]);
         }
@@ -443,13 +443,14 @@ class Vidrasso extends Table {
         $this->deck->moveCard($card_id, 'cardsontable', $player_id);
         if (self::getGameStateValue('ledSuit') == 0)
             self::setGameStateValue('ledSuit', $current_card['type']);
-        self::notifyAllPlayers('playCard', clienttranslate('${player_name} plays ${value} ${suit_displayed}'), [
+        self::notifyAllPlayers('playCard', clienttranslate('${player_name} plays ${value} ${suit}'), [
             'card_id' => $card_id,
             'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
             'value' => $current_card['type_arg'],
-            'suit' => $current_card['type'],
-            'suit_displayed' => $this->formatSuitText($current_card['type'])]);
+            'suit_id' => $current_card['type'],
+            'suit' => $this->getSuitLogName($current_card['type']),
+        ]);
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -698,14 +699,14 @@ class Vidrasso extends Table {
             $points = $score_pile['points'] + $gift_value;
             $sql = "UPDATE player SET player_score=player_score+$points  WHERE player_id='$player_id'";
             self::DbQuery($sql);
-            self::notifyAllPlayers('endHand', clienttranslate('${player_name} scores ${points} points (was gifted ${gift_value} ${gift_suit_symbol})'), [
+            self::notifyAllPlayers('endHand', clienttranslate('${player_name} scores ${points} points (was gifted ${gift_value} ${suit})'), [
                 'i18n' => ['gift_suit_name'],
                 'player_id' => $player_id,
                 'player_name' => $players[$player_id]['player_name'],
                 'points' => $points,
                 'gift_value' => $gift_value,
                 'gift_suit' => $gift_card['type'],
-                'gift_suit_symbol' => $this->formatSuitText($gift_card['type']),
+                'suit' => $this->getSuitLogName($gift_card['type']),
             ]);
 
             $this->incStat($score_pile['won_tricks'], 'won_tricks', $player_id);
@@ -752,10 +753,10 @@ class Vidrasso extends Table {
         foreach ($players as $player_id => $player) {
             $gift_card = $gift_cards_by_player[$player_id];
             $row[] = [
-                'str' => '${gift_value} ${gift_suit}',
+                'str' => '${gift_value} ${suit}',
                 'args' => [
                     'gift_value' => $gift_card['type_arg'],
-                    'gift_suit' => $this->formatSuitText($gift_card['type']),
+                    'suit' => $this->getSuitLogName($gift_card['type']),
                 ],
             ];
         }
