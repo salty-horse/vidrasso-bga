@@ -43,11 +43,14 @@
 /********* You can start writing your CSS below this line: **********/
 /** Table layout **/
 
+#centerarea {
+    text-align: center;
+}
+
 #playertables {
     display: inline-block;
     vertical-align: middle;
     height: 180px;
-    margin-left: 30px;
 }
 
 .playertablename {
