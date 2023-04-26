@@ -44,13 +44,11 @@
 /** Table layout **/
 
 #centerarea {
-    text-align: center;
-}
-
-#playertables {
-    display: inline-block;
-    vertical-align: middle;
-    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0px 60px;
 }
 
 .playertablename {
@@ -60,8 +58,6 @@
 .playertable {
     text-align: center;
     width: 180px;
-    float: left;
-    margin-right: 60px;
 }
 
 .table_currentplayer {
@@ -70,7 +66,7 @@
 }
 
 #trumpSelector {
-    height: 130px;
+    min-height: 130px;
     display: inline-block;
     vertical-align: middle;
 }

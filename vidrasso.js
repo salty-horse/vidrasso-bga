@@ -174,7 +174,7 @@ function (dojo, declare) {
             switch (stateName) {
             case 'selectTrump':
                 if (this.isCurrentPlayerActive()) {
-                    document.getElementById('playertables').style.display = 'none';
+                    document.querySelectorAll('.playertable').forEach(e => e.style.display = 'none');
                     document.getElementById('rankSelector').style.display = (this.gamedatas.trumpRank == '0') ? 'inline-block' : 'none';
                     document.getElementById('suitSelector').style.display = (this.gamedatas.trumpSuit == '0') ? 'inline-block' : 'none';
                     let elem = document.getElementById('trump_rank');
@@ -223,7 +223,7 @@ function (dojo, declare) {
             case 'selectTrump':
                 document.getElementById('rankSelector').style.display = 'none';
                 document.getElementById('suitSelector').style.display = 'none';
-                document.getElementById('playertables').style.display = 'inline-block';
+                document.querySelectorAll('.playertable').forEach(e => e.style.display = '');
                 break;
             }
         },
@@ -403,7 +403,7 @@ function (dojo, declare) {
                 return;
 
             // Remove from all players before adding for desired player
-            document.querySelectorAll('#playertables .table_currentplayer').forEach(
+            document.querySelectorAll('#centerarea .table_currentplayer').forEach(
                 e => e.classList.remove('table_currentplayer'));
             if (!turn_on) {
                 return;
