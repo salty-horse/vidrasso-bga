@@ -43,7 +43,7 @@
 /********* You can start writing your CSS below this line: **********/
 /** Table layout **/
 
-#centerarea {
+#vid_centerarea {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -51,43 +51,43 @@
     gap: 0px 60px;
 }
 
-.playertablename {
+.vid_playertablename {
     font-weight: bold;
 }
 
-.playertable {
+.vid_playertable {
     text-align: center;
     width: 180px;
 }
 
-.table_currentplayer {
+.vid_table_currentplayer {
     outline: 2px dashed black;
     outline-offset: -2px;
 }
 
-#trumpSelector {
+#vid_trumpSelector {
     min-height: 130px;
     display: inline-block;
     vertical-align: middle;
 }
 
-#trumpSelector > div {
+#vid_trumpSelector > div {
     display: flex;
     align-items: center
 }
 
-#trumpSelector > div > div {
+#vid_trumpSelector > div > div {
     height: 1em;
     padding-top: 1em;
     padding-bottom: 1em;
 }
 
-#trumpSelector ul {
+#vid_trumpSelector ul {
     list-style-type: none;
     overflow: hidden;
 }
 
-#trumpSelector li {
+#vid_trumpSelector li {
     float: left;
     padding: 8px;
     outline: 1px solid black;
@@ -102,19 +102,19 @@
     cursor: pointer;
 }
 
-#rankSelector {
+#vid_rankSelector {
     display: none;
 }
 
-#suitSelector {
+#vid_suitSelector {
     display: none;
 }
 
-#suitSelector li {
+#vid_suitSelector li {
     background-size: 70%;
 }
 
-.trump_indicator {
+.vid_trump_indicator {
     padding: 8px !important;
     outline-offset: -2px;
     height: 32px !important;
@@ -125,7 +125,7 @@
     background-size: 70%;
 }
 
-.playertablecard {
+.vid_playertablecard {
     display: inline-block;
     position: relative;
     margin-top: 5px;
@@ -134,12 +134,12 @@
     height: 93px;
 }
 
-.playertable_info {
+.vid_playertable_info {
     display: block;
     width: auto;
 }
 
-.straw {
+.vid_straw {
     display: inline-block;
     position: relative;
     margin-top: 5px;
@@ -149,7 +149,7 @@
     padding-right: 5px;
 }
 
-.strawcard {
+.vid_strawcard {
     position: absolute;
     width: 93px;
     height: 93px;
@@ -165,7 +165,7 @@
     box-shadow: 1px 1px 1px 1px black;
 }
 
-.straw_more {
+.vid_straw_more {
     background-image: url('img/card_back.png');
     width: 93px;
     height: 93px;
@@ -176,11 +176,11 @@
     box-shadow: 1px 1px 1px 1px black;
 }
 
-.spectatorMode #myhand_wrap {
+.spectatorMode #vid_myhand_wrap {
     display: none;
 }
 
-.cardontable {
+.vid_cardontable {
     position: absolute;
     width: 93px;
     height: 93px;
@@ -190,45 +190,45 @@
     box-shadow: 1px 1px 1px 1px black;
 }
 
-.playable {
+.vid_playable {
     cursor: pointer !important;
     box-shadow: 1px 1px 1px 1px black, 0px 0px 3px 3px yellow;
     border-radius: 25%;
 }
 
-.bgavid_hand_size {
+.vid_hand_size {
     padding-left: 46px;
 }
 
 /* Spade */
-.suit_icon_1 {
+.vid_suit_icon_1 {
     background-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB3aWR0aD0iMTAuOTI0bW0iIGhlaWdodD0iMTIuMTI1bW0iIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDEwLjkyNCAxMi4xMjUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLS42NzExMiAtLjIyNDA4KSI+PHBhdGggZD0ibTYuMTMzMSAwLjI5ODczLTQuNzcyNyA1LjI5MTJoNC41N2UtNGEyLjcwNjEgMi41MzU5IDAgMCAwLTAuNjM5NzQgMS42MzcgMi43MDYxIDIuNTM1OSAwIDAgMCAyLjcwNjEgMi41MzU5IDIuNzA2MSAyLjUzNTkgMCAwIDAgMi4zNDY5LTEuMjc5N2wtMS4wOTExIDMuODE1NmgyLjkwMDRsLTEuMDg5OC0zLjgxMTVhMi43MDYxIDIuNTM1OSAwIDAgMCAyLjM0NTcgMS4yNzU2IDIuNzA2MSAyLjUzNTkgMCAwIDAgMi43MDYtMi41MzU5IDIuNzA2MSAyLjUzNTkgMCAwIDAtMC42Mzk3NC0xLjYzN2gzLjU5ZS00eiIgZmlsbD0iI2FjOThiMyIgZmlsbC1vcGFjaXR5PSIuOTQxMTgiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIuMSIgc3R5bGU9InBhaW50LW9yZGVyOm5vcm1hbCIvPjwvZz48L3N2Zz4K");
     background-position: center;
     background-repeat: no-repeat;
 }
 
 /* Heart */
-.suit_icon_2 {
+.vid_suit_icon_2 {
     background-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB3aWR0aD0iMTAuOTI0bW0iIGhlaWdodD0iMTIuMTQ1bW0iIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDEwLjkyNCAxMi4xNDUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLS44MTI2IC02OC44MjcpIj48cGF0aCBkPSJtNi4yNzU1IDgwLjg3Ny01LjA0OTctOC4xOTYyIDAuMDAxOC02LjZlLTRhMi43MDYxIDIuNTM1OSAwIDAgMS0wLjM2NS0xLjI2NzMgMi43MDYxIDIuNTM1OSAwIDAgMSAyLjcwNi0yLjUzNTkgMi43MDYxIDIuNTM1OSAwIDAgMSAyLjcwNjEgMi41MzU5IDIuNzA2MSAyLjUzNTkgMCAwIDEgMi43MDYxLTIuNTM1OSAyLjcwNjEgMi41MzU5IDAgMCAxIDIuNzA2MSAyLjUzNTkgMi43MDYxIDIuNTM1OSAwIDAgMS0wLjM2NTAyIDEuMjY3M2wwLjAwMTggNi42ZS00eiIgZmlsbD0iI2ZmNGU0ZSIgZmlsbC1vcGFjaXR5PSIuOTQxMTgiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIuMSIgc3R5bGU9InBhaW50LW9yZGVyOm5vcm1hbCIvPjwvZz48L3N2Zz4K");
     background-position: center;
     background-repeat: no-repeat;
 }
 
 /* Club */
-.suit_icon_3 {
+.vid_suit_icon_3 {
     background-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB3aWR0aD0iMTAuOTI0bW0iIGhlaWdodD0iMTIuMW1tIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAxMC45MjQgMTIuMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzOC45MjcgLTcxLjMzNykiPjxwYXRoIGQ9Im0tMzMuNDY1IDcxLjM4N2MtMS4yMjQ4IDAtMi4yOTY4IDAuNzcwODktMi42MTM4IDEuODc5NS0wLjMxNjk4IDEuMTA4NyAwLjIwMDE0IDIuMjc4NiAxLjI2MDggMi44NTI1LTEuMDYwNy0wLjU3Mzg4LTIuNDAwNS0wLjQwODUzLTMuMjY2NSAwLjQwMzA1LTAuODY2MDQgMC44MTE2LTEuMDQyNCAyLjA2NzEtMC40Mjk5OCAzLjA2MTEgMC42MTI0MSAwLjk5Mzk5IDEuODYwOCAxLjQ3ODYgMy4wNDM5IDEuMTgxNSAwLjcxMjEtMC4xNzg4MyAxLjI5MzMtMC42MTQxOCAxLjY0MzQtMS4xODI2bC0xLjA4NzkgMy44MDVoMi45MDAzbC0xLjA4OC0zLjgwNTNjMC4zNTAxIDAuNTY4NTkgMC45MzEyNSAxLjAwNDEgMS42NDM1IDEuMTgzIDEuMTgzIDAuMjk3MDMgMi40MzE2LTAuMTg3NTcgMy4wNDQtMS4xODE1IDAuNjEyMzgtMC45OTM5OCAwLjQzNTk2LTIuMjQ5NS0wLjQzMDExLTMuMDYxMS0wLjg2NjA0LTAuODExNi0yLjIwNTgtMC45NzY5NC0zLjI2NjUtMC40MDMwNiAxLjA2MDctMC41NzM4OCAxLjU3NzktMS43NDM4IDEuMjYwOS0yLjg1MjUtMC4zMTcwMS0xLjEwODYtMS4zODkxLTEuODc5NS0yLjYxMzktMS44Nzk1eiIgZmlsbD0iIzRkYjE0YyIgZmlsbC1vcGFjaXR5PSIuOTQxMTgiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIuMSIgc3R5bGU9InBhaW50LW9yZGVyOm5vcm1hbCIvPjwvZz48L3N2Zz4K");
     background-position: center;
     background-repeat: no-repeat;
 }
 
 /* Diamond */
-.suit_icon_4 {
+.vid_suit_icon_4 {
     background-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB3aWR0aD0iMTAuOTU5bW0iIGhlaWdodD0iMTIuMTQ5bW0iIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDEwLjk1OSAxMi4xNDkiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0ibTUuNDc5NCAwLjA3NDY1LTUuNDEyMSA2IDUuNDEyMSA2IDUuNDEyMS02eiIgZmlsbD0iIzMxNjlhYSIgZmlsbC1vcGFjaXR5PSIuOTQxMTgiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIuMSIgc3R5bGU9InBhaW50LW9yZGVyOm5vcm1hbCIvPjwvc3ZnPgo=");
     background-position: center;
     background-repeat: no-repeat;
 }
 
-.log_suit {
+.vid_log_suit {
     display: inline-block;
     background-size: contain;
     width: 1em;

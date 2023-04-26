@@ -55,7 +55,6 @@ class view_vidrasso_vidrasso extends game_view {
                 'PLAYER_ID' => $player_id,
                 'PLAYER_NAME' => $players[$player_id]['player_name'],
                 'PLAYER_COLOR' => $players[$player_id]['player_color'],
-                'DIR' => $dir
             ]);
 
             if (!$this->game->isSpectator() && $player_id != $current_player_id) {

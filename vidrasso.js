@@ -74,12 +74,12 @@ function (dojo, declare) {
             // Player hand
             this.playerHand = new ebg.stock();
             this.playerHand.setSelectionMode(1);
-            this.playerHand.create(this, $('myhand'), this.cardWidth, this.cardHeight);
+            this.playerHand.create(this, $('vid_myhand'), this.cardWidth, this.cardHeight);
             this.playerHand.image_items_per_row = 9;
 
             dojo.connect(this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged');
 
-            dojo.query('#trumpSelector li').forEach((node, index, arr) => {
+            dojo.query('#vid_trumpSelector li').forEach((node, index, arr) => {
                 dojo.connect(node, 'onclick', this, 'onChoosingTrump');
             });
 
@@ -122,7 +122,7 @@ function (dojo, declare) {
                 // Strawmen
                 this.initStrawmen(player_id, player_info.visible_strawmen, player_info.more_strawmen);
             }
-            this.addTooltipToClass('bgavid_hand_size', _('Number of cards in hand'), '');
+            this.addTooltipToClass('vid_hand_size', _('Number of cards in hand'), '');
 
             // Cards played on table
             for (i in this.gamedatas.cardsontable) {
@@ -137,23 +137,23 @@ function (dojo, declare) {
                 this.markTrumps();
             }
 
-            let elem = document.getElementById('trump_rank');
+            let elem = document.getElementById('vid_trump_rank');
             if (this.gamedatas.trumpRank != '0') {
                 elem.textContent = this.gamedatas.trumpRank;
             } else {
                 elem.textContent = '?';
             }
 
-            elem = document.getElementById('trump_suit');
+            elem = document.getElementById('vid_trump_suit');
             if (this.gamedatas.trumpSuit != '0') {
-                elem.className = `trump_indicator suit_icon_${this.gamedatas.trumpSuit}`;
+                elem.className = `vid_trump_indicator vid_suit_icon_${this.gamedatas.trumpSuit}`;
                 elem.title = elem['aria-label'] = this.suitNames[this.gamedatas.trumpSuit];
             } else {
                 elem.textContent = '?';
-                elem.className = 'trump_indicator';
+                elem.className = 'vid_trump_indicator';
             }
 
-            this.addTooltipToClass("playertablecard", _("Card played on the table"), '');
+            this.addTooltipToClass('vid_playertablecard', _('Card played on the table'), '');
 
             // Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
@@ -174,14 +174,14 @@ function (dojo, declare) {
             switch (stateName) {
             case 'selectTrump':
                 if (this.isCurrentPlayerActive()) {
-                    document.querySelectorAll('.playertable').forEach(e => e.style.display = 'none');
-                    document.getElementById('rankSelector').style.display = (this.gamedatas.trumpRank == '0') ? 'inline-block' : 'none';
-                    document.getElementById('suitSelector').style.display = (this.gamedatas.trumpSuit == '0') ? 'inline-block' : 'none';
-                    let elem = document.getElementById('trump_rank');
+                    document.querySelectorAll('.vid_playertable').forEach(e => e.style.display = 'none');
+                    document.getElementById('vid_rankSelector').style.display = (this.gamedatas.trumpRank == '0') ? 'inline-block' : 'none';
+                    document.getElementById('vid_suitSelector').style.display = (this.gamedatas.trumpSuit == '0') ? 'inline-block' : 'none';
+                    let elem = document.getElementById('vid_trump_rank');
                     if (elem.textContent == '?') {
                         elem.textContent = '';
                     }
-                    elem = document.getElementById('trump_suit');
+                    elem = document.getElementById('vid_trump_suit');
                     if (elem.textContent == '?') {
                         elem.textContent = '';
                     }
@@ -197,13 +197,13 @@ function (dojo, declare) {
 
                 // Highlight playable cards
                 for (let card_id of args.args._private.playable_cards) {
-                    let elem = document.getElementById(`myhand_item_${card_id}`);
+                    let elem = document.getElementById(`vid_myhand_item_${card_id}`);
                     // Look for strawman
                     if (!elem) {
-                        elem = document.querySelector(`#mystrawmen div[data-card_id="${card_id}"]`)
+                        elem = document.querySelector(`#vid_mystrawmen div[data-card_id="${card_id}"]`)
                     }
                     if (elem) {
-                        elem.classList.add('playable');
+                        elem.classList.add('vid_playable');
                     }
                 }
                 break;
@@ -221,9 +221,9 @@ function (dojo, declare) {
         {
             switch (stateName) {
             case 'selectTrump':
-                document.getElementById('rankSelector').style.display = 'none';
-                document.getElementById('suitSelector').style.display = 'none';
-                document.querySelectorAll('.playertable').forEach(e => e.style.display = '');
+                document.getElementById('vid_rankSelector').style.display = 'none';
+                document.getElementById('vid_suitSelector').style.display = 'none';
+                document.querySelectorAll('.vid_playertable').forEach(e => e.style.display = '');
                 break;
             }
         },
@@ -237,8 +237,8 @@ function (dojo, declare) {
                 switch(stateName) {
                 // Mark hand cards if player hasn't gifted yet
                 case 'giftCard':
-                    document.querySelectorAll('#myhand .stockitem').forEach(
-                        e => e.classList.add('playable'));
+                    document.querySelectorAll('#vid_myhand .stockitem').forEach(
+                        e => e.classList.add('vid_playable'));
                     break;
                 }
             }
@@ -295,7 +295,7 @@ function (dojo, declare) {
         getSuitDiv: function (suit_symbol) {
             let suit_id = this.suitSymbolToId[suit_symbol];
             let suit_name = this.suitNames[suit_id];
-            return `<div role=\"img\" title=\"${suit_name}\" aria-label=\"${suit_name}\" class=\"log_suit suit_icon_${suit_id}\"></div>`;
+            return `<div role=\"img\" title=\"${suit_name}\" aria-label=\"${suit_name}\" class=\"vid_log_suit vid_suit_icon_${suit_id}\"></div>`;
         },
 
         getCardUniqueId: function(suit, rank) {
@@ -329,18 +329,18 @@ function (dojo, declare) {
             for (const [ix, straw] of visible_strawmen.entries()) {
                 if (!straw) continue;
                 this.setStrawman(player_id, ix + 1, straw.type, straw.type_arg, straw.id);
-                this.visibleCards[`${straw.type},${straw.type_arg}`] = `straw_${player_id}_${ix + 1}`;
+                this.visibleCards[`${straw.type},${straw.type_arg}`] = `vid_straw_${player_id}_${ix + 1}`;
                 if (!more_strawmen || more_strawmen[ix]) {
                     let more = document.createElement('div');
-                    more.className = 'straw_more';
-                    document.getElementById(`straw_${player_id}_${ix+1}`).parentNode.appendChild(more);
+                    more.className = 'vid_straw_more';
+                    document.getElementById(`vid_straw_${player_id}_${ix+1}`).parentNode.appendChild(more);
                 }
             }
         },
 
         setStrawman: function(player_id, straw_num, suit, rank, card_id) {
             let spriteCoords = this.getCardSpriteXY(suit, rank);
-            let elem = document.getElementById(`playerstraw_${player_id}_${straw_num}`);
+            let elem = document.getElementById(`vid_playerstraw_${player_id}_${straw_num}`);
             let newElem = dojo.place(this.format_block('jstpl_strawman', {
                 x: spriteCoords.x,
                 y: spriteCoords.y,
@@ -362,7 +362,7 @@ function (dojo, declare) {
                 x : spriteCoords.x,
                 y : spriteCoords.y,
                 player_id : player_id
-            }), 'playertablecard_' + player_id);
+            }), 'vid_playertablecard_' + player_id);
             placedCard.dataset.card_id = card_id;
         },
 
@@ -371,19 +371,19 @@ function (dojo, declare) {
 
             let strawElem = this.strawmenById[card_id];
             if (strawElem) {
-                this.placeOnObject('cardontable_' + player_id, strawElem.id);
+                this.placeOnObject('vid_cardontable_' + player_id, strawElem.id);
                 strawElem.remove();
                 delete this.strawmenById[card_id];
             } else {
                 if (player_id != this.player_id) {
                     // Some opponent played a card
                     // Move card from player panel
-                    this.placeOnObject('cardontable_' + player_id, 'overall_player_board_' + player_id);
+                    this.placeOnObject('vid_cardontable_' + player_id, 'overall_player_board_' + player_id);
                 } else {
                     // You played a card. If it exists in your hand, move card from there and remove
                     // corresponding item
-                    if ($('myhand_item_' + card_id)) {
-                        this.placeOnObject('cardontable_' + player_id, 'myhand_item_' + card_id);
+                    if ($('vid_myhand_item_' + card_id)) {
+                        this.placeOnObject('vid_cardontable_' + player_id, 'vid_myhand_item_' + card_id);
                         this.playerHand.removeFromStockById(card_id);
                     }
                 }
@@ -391,36 +391,36 @@ function (dojo, declare) {
             }
 
             // In any case: move it to its final destination
-            this.slideToObject('cardontable_' + player_id, 'playertablecard_' + player_id).play();
+            this.slideToObject('vid_cardontable_' + player_id, 'vid_playertablecard_' + player_id).play();
         },
 
         markActivePlayerTable: function(turn_on, player_id) {
             if (!player_id) {
                 player_id = this.getActivePlayerId();
             }
-            if (turn_on && player_id && document.getElementById(`playertable_${player_id}`).classList.contains('table_currentplayer'))
+            if (turn_on && player_id && document.getElementById(`vid_playertable_${player_id}`).classList.contains('vid_table_currentplayer'))
                 // Do nothing
                 return;
 
             // Remove from all players before adding for desired player
-            document.querySelectorAll('#centerarea .table_currentplayer').forEach(
-                e => e.classList.remove('table_currentplayer'));
+            document.querySelectorAll('#vid_centerarea .vid_table_currentplayer').forEach(
+                e => e.classList.remove('vid_table_currentplayer'));
             if (!turn_on) {
                 return;
             }
             if (!player_id) {
                 return;
             }
-            document.getElementById(`playertable_${player_id}`).classList.add('table_currentplayer')
+            document.getElementById(`vid_playertable_${player_id}`).classList.add('vid_table_currentplayer')
         },
 
         unmarkPlayableCards: function() {
-            document.querySelectorAll('#mystrawmen .playable, #myhand .playable').forEach(
-                e => e.classList.remove('playable'));
+            document.querySelectorAll('#vid_mystrawmen .vid_playable, #vid_myhand .vid_playable').forEach(
+                e => e.classList.remove('vid_playable'));
         },
 
         setStrawmanPlayerLabel: function(player_info) {
-            document.querySelector(`#player_${player_info.id}_strawmen_wrap > h3`).innerHTML = dojo.string.substitute(
+            document.querySelector(`#vid_player_${player_info.id}_strawmen_wrap > h3`).innerHTML = dojo.string.substitute(
                 _("${player_name}'s strawmen"),
                 {player_name: `<span style="color:#${player_info.color}">${player_info.name}</span>`});
         },
@@ -472,7 +472,7 @@ function (dojo, declare) {
             if (items.length == 0)
                 return
             this.playerHand.unselectAll();
-            if (!document.getElementById(this.playerHand.getItemDivId(items[0].id)).classList.contains('playable')) {
+            if (!document.getElementById(this.playerHand.getItemDivId(items[0].id)).classList.contains('vid_playable')) {
                 return;
             }
 
@@ -495,7 +495,7 @@ function (dojo, declare) {
             if (!this.checkAction('playCard', true))
                 return;
 
-            if (!event.currentTarget.classList.contains('playable'))
+            if (!event.currentTarget.classList.contains('vid_playable'))
                 return;
 
             let card_id = event.currentTarget.dataset.card_id;
@@ -565,10 +565,10 @@ function (dojo, declare) {
         },
 
         notif_newHandPublic: function(notif) {
-            document.getElementById('trump_rank').textContent = '?';
-            let elem = document.getElementById('trump_suit');
+            document.getElementById('vid_trump_rank').textContent = '?';
+            let elem = document.getElementById('vid_trump_suit');
             elem.textContent = '?';
-            elem.className = 'trump_indicator';
+            elem.className = 'vid_trump_indicator';
             this.gamedatas.trumpRank = '0';
             this.gamedatas.trumpSuit = '0';
 
@@ -604,12 +604,12 @@ function (dojo, declare) {
 
         notif_selectTrumpRank: function(notif) {
             this.gamedatas.trumpRank = notif.args.rank;
-            let elem = document.getElementById('trump_rank');
+            let elem = document.getElementById('vid_trump_rank');
             elem.textContent = notif.args.rank;
             elem.style.display = 'block';
-            document.getElementById('rankSelector').style.display = 'none';
+            document.getElementById('vid_rankSelector').style.display = 'none';
 
-            elem = document.getElementById('trump_suit');
+            elem = document.getElementById('vid_trump_suit');
             if (elem.style.display == 'none') {
                 elem.textContent = '?';
                 elem.style.display = 'block';
@@ -620,14 +620,14 @@ function (dojo, declare) {
 
         notif_selectTrumpSuit: function(notif) {
             this.gamedatas.trumpSuit = notif.args.suit_id;
-            let elem = document.getElementById('trump_suit');
+            let elem = document.getElementById('vid_trump_suit');
             elem.style.display = 'block';
             elem.textContent = '';
-            elem.className = `trump_indicator suit_icon_${this.gamedatas.trumpSuit}`;
+            elem.className = `vid_trump_indicator vid_suit_icon_${this.gamedatas.trumpSuit}`;
             elem.title = elem['aria-label'] = this.suitNames[this.gamedatas.trumpSuit];
-            document.getElementById('suitSelector').style.display = 'none';
+            document.getElementById('vid_suitSelector').style.display = 'none';
 
-            elem = document.getElementById('trump_rank');
+            elem = document.getElementById('vid_trump_rank');
             if (elem.style.display == 'none') {
                 elem.style.display = 'block';
             }
@@ -659,8 +659,8 @@ function (dojo, declare) {
                 let pile_id = revealed_card.pile;
                 let card = revealed_card.card;
 
-                let pileElem = document.getElementById(`playerstraw_${player_id}_${pile_id}`);
-                let more = pileElem.querySelector('.straw_more');
+                let pileElem = document.getElementById(`vid_playerstraw_${player_id}_${pile_id}`);
+                let more = pileElem.querySelector('.vid_straw_more');
                 if (more) {
                     this.fadeOutAndDestroy(more);
                 }
@@ -679,12 +679,12 @@ function (dojo, declare) {
             let winner_id = notif.args.player_id;
             for (let player_id in this.gamedatas.players) {
                 // Make sure the moved card is above the winner card
-                let animated_id = 'cardontable_' + player_id;
+                let animated_id = 'vid_cardontable_' + player_id;
                 if (player_id != winner_id) {
                     document.getElementById(animated_id).style.zIndex = 3;
                 }
 
-                let anim = this.slideToObject(animated_id, 'cardontable_' + winner_id);
+                let anim = this.slideToObject(animated_id, 'vid_cardontable_' + winner_id);
                 dojo.connect(anim, 'onEnd', (node) => {
                     dojo.destroy(node);
                 });

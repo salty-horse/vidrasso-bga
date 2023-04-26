@@ -25,37 +25,37 @@
     Please REMOVE this comment before publishing your game on BGA
 -->
 
-<div id="player_{TOP_PLAYER_ID}_strawmen_wrap" class="whiteblock">
+<div id="vid_player_{TOP_PLAYER_ID}_strawmen_wrap" class="whiteblock">
     <h3>Opponent's strawmen</h3>
     <div>
-        <div class="straw" id="playerstraw_{TOP_PLAYER_ID}_1"></div>
-        <div class="straw" id="playerstraw_{TOP_PLAYER_ID}_2"></div>
-        <div class="straw" id="playerstraw_{TOP_PLAYER_ID}_3"></div>
-        <div class="straw" id="playerstraw_{TOP_PLAYER_ID}_4"></div>
-        <div class="straw" id="playerstraw_{TOP_PLAYER_ID}_5"></div>
+        <div class="vid_straw" id="vid_playerstraw_{TOP_PLAYER_ID}_1"></div>
+        <div class="vid_straw" id="vid_playerstraw_{TOP_PLAYER_ID}_2"></div>
+        <div class="vid_straw" id="vid_playerstraw_{TOP_PLAYER_ID}_3"></div>
+        <div class="vid_straw" id="vid_playerstraw_{TOP_PLAYER_ID}_4"></div>
+        <div class="vid_straw" id="vid_playerstraw_{TOP_PLAYER_ID}_5"></div>
     </div>
 </div>
 
-<div id="centerarea">
+<div id="vid_centerarea">
 
 <!-- BEGIN player -->
-<div id="playertable_{PLAYER_ID}" class="playertable whiteblock playertable_{DIR}">
-    <div class="playertablename" style="color:#{PLAYER_COLOR}">
+<div id="vid_playertable_{PLAYER_ID}" class="vid_playertable whiteblock">
+    <div class="vid_playertablename" style="color:#{PLAYER_COLOR}">
         {PLAYER_NAME}
     </div>
-    <div class="playertablecard" id="playertablecard_{PLAYER_ID}"></div>
-    <span class="playertable_info">
+    <div class="vid_playertablecard" id="vid_playertablecard_{PLAYER_ID}"></div>
+    <span class="vid_playertable_info">
         <span>{SCORE_PILE}: </span>
         <span id="score_pile_{PLAYER_ID}"></span>
     </span>
 </div>
 <!-- END player -->
 
-<div id="trumpSelector" class="whiteblock">
+<div id="vid_trumpSelector" class="whiteblock">
     <div>
     <div>{TRUMP_RANK}:</div>
-    <div id="trump_rank" class="trump_indicator"></div>
-    <ul id="rankSelector">
+    <div id="vid_trump_rank" class="vid_trump_indicator"></div>
+    <ul id="vid_rankSelector">
         <li data-type="rank" data-id="1">1</li>
         <li data-type="rank" data-id="2">2</li>
         <li data-type="rank" data-id="3">3</li>
@@ -70,31 +70,31 @@
     <br>
     <div>
     <div>{TRUMP_SUIT}:</div>
-    <div id="trump_suit" class="trump_indicator"></div>
-    <ul id="suitSelector">
-        <li data-type="suit" class="suit_icon_1" data-id="1"></li>
-        <li data-type="suit" class="suit_icon_2" data-id="2"></li>
-        <li data-type="suit" class="suit_icon_3" data-id="3"></li>
-        <li data-type="suit" class="suit_icon_4" data-id="4"></li>
+    <div id="vid_trump_suit" class="vid_trump_indicator"></div>
+    <ul id="vid_suitSelector">
+        <li data-type="suit" class="vid_suit_icon_1" data-id="1"></li>
+        <li data-type="suit" class="vid_suit_icon_2" data-id="2"></li>
+        <li data-type="suit" class="vid_suit_icon_3" data-id="3"></li>
+        <li data-type="suit" class="vid_suit_icon_4" data-id="4"></li>
     </ul>
     </div>
 </div>
 
 </div>
 
-<div id="player_{BOTTOM_PLAYER_ID}_strawmen_wrap" class="whiteblock">
+<div id="vid_player_{BOTTOM_PLAYER_ID}_strawmen_wrap" class="whiteblock">
     <h3>{MY_STRAWMEN}</h3>
-    <div id="mystrawmen">
-        <div class="straw" id="playerstraw_{BOTTOM_PLAYER_ID}_1"></div>
-        <div class="straw" id="playerstraw_{BOTTOM_PLAYER_ID}_2"></div>
-        <div class="straw" id="playerstraw_{BOTTOM_PLAYER_ID}_3"></div>
-        <div class="straw" id="playerstraw_{BOTTOM_PLAYER_ID}_4"></div>
-        <div class="straw" id="playerstraw_{BOTTOM_PLAYER_ID}_5"></div>
+    <div id="vid_mystrawmen">
+        <div class="vid_straw" id="vid_playerstraw_{BOTTOM_PLAYER_ID}_1"></div>
+        <div class="vid_straw" id="vid_playerstraw_{BOTTOM_PLAYER_ID}_2"></div>
+        <div class="vid_straw" id="vid_playerstraw_{BOTTOM_PLAYER_ID}_3"></div>
+        <div class="vid_straw" id="vid_playerstraw_{BOTTOM_PLAYER_ID}_4"></div>
+        <div class="vid_straw" id="vid_playerstraw_{BOTTOM_PLAYER_ID}_5"></div>
     </div>
 </div>
-<div id="myhand_wrap" class="whiteblock">
+<div id="vid_myhand_wrap" class="whiteblock">
     <h3>{MY_HAND}</h3>
-    <div id="myhand">
+    <div id="vid_myhand">
     </div>
 </div>
 
@@ -103,9 +103,9 @@
 
 // Javascript HTML templates
 
-var jstpl_cardontable = '<div class="cardontable" id="cardontable_${player_id}" style="background-position:-${x}% -${y}%"></div>';
-var jstpl_strawman = '<div class="strawcard" id="straw_${player_id}_${straw_num}" style="background-position:-${x}% -${y}%"></div>';
-var jstpl_player_hand_size = '\<div class="bgavid_hand_size">\
+var jstpl_cardontable = '<div class="vid_cardontable" id="vid_cardontable_${player_id}" style="background-position:-${x}% -${y}%"></div>';
+var jstpl_strawman = '<div class="vid_strawcard" id="vid_straw_${player_id}_${straw_num}" style="background-position:-${x}% -${y}%"></div>';
+var jstpl_player_hand_size = '\<div class="vid_hand_size">\
     \<span id="player_hand_size_${id}" class="player_hand_size_value">0\</span>\
     \<span class="fa fa-hand-paper-o bgavid_hand_size_icon"/>\
 </div>';
