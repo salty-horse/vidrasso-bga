@@ -150,6 +150,7 @@ function (dojo, declare) {
                 elem.title = elem['aria-label'] = this.suitNames[this.gamedatas.trumpSuit];
             } else {
                 elem.textContent = '?';
+                elem.removeAttribute('title');
                 elem.className = 'vid_trump_indicator';
             }
 
@@ -184,6 +185,7 @@ function (dojo, declare) {
                     elem = document.getElementById('vid_trump_suit');
                     if (elem.textContent == '?') {
                         elem.textContent = '';
+                        elem.removeAttribute('title');
                     }
                 }
                 break;
@@ -568,6 +570,7 @@ function (dojo, declare) {
             document.getElementById('vid_trump_rank').textContent = '?';
             let elem = document.getElementById('vid_trump_suit');
             elem.textContent = '?';
+            elem.removeAttribute('title');
             elem.className = 'vid_trump_indicator';
             this.gamedatas.trumpRank = '0';
             this.gamedatas.trumpSuit = '0';
@@ -612,6 +615,7 @@ function (dojo, declare) {
             elem = document.getElementById('vid_trump_suit');
             if (elem.style.display == 'none') {
                 elem.textContent = '?';
+                elem.removeAttribute('title');
                 elem.style.display = 'block';
             }
 
