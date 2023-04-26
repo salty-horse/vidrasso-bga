@@ -30,13 +30,6 @@ function (dojo, declare) {
             this.cardWidth = 93;
             this.cardHeight = 93;
 
-            this.suitNames = {
-                1: _('spades'),
-                2: _('hearts'),
-                3: _('clubs'),
-                4: _('diamonds'),
-            };
-
             this.suitSymbolToId = {
                 '♠': 1,
                 '♥': 2,
@@ -61,6 +54,13 @@ function (dojo, declare) {
 
         setup: function(gamedatas) {
             console.log('gamedatas', gamedatas);
+
+            this.suitNames = {
+                1: _('spades'),
+                2: _('hearts'),
+                3: _('clubs'),
+                4: _('diamonds'),
+            };
 
             // Set dynamic UI strings
             if (this.isSpectator) {
