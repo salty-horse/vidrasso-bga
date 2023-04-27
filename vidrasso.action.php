@@ -15,7 +15,7 @@
  * user interface logic (javascript).
  *
  * If you define a method 'myAction' here, then you can call it from your javascript code with:
- * this.ajaxcall( '/vidrasso/vidrasso/myAction.html', ...)
+ * this.ajaxcall('/vidrasso/vidrasso/myAction.html', ...)
  *
  */
 
@@ -35,7 +35,7 @@ class action_vidrasso extends APP_GameAction {
 
     public function selectTrump() {
         self::setAjaxMode();
-        $trump_type = self::getArg( 'trump_type', AT_enum, true, null, ['rank', 'suit']);
+        $trump_type = self::getArg('trump_type', AT_enum, true, null, ['rank', 'suit']);
         $trump_id = self::getArg('id', AT_posint, true);
         if ($trump_type == 'rank' && $trump_id > 10 || $trump_type == 'suit' && $trump_id > 4)
             throw new BgaUserException(self::_('Invalid trump value'));
