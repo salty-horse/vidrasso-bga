@@ -107,7 +107,7 @@ var jstpl_cardontable = '<div class="vid_cardontable" id="vid_cardontable_${play
 var jstpl_strawman = '<div class="vid_strawcard" id="vid_straw_${player_id}_${straw_num}" style="background-position:-${x}% -${y}%"></div>';
 var jstpl_player_hand_size = '\<div class="vid_hand_size">\
     \<span id="player_hand_size_${id}" class="player_hand_size_value">0\</span>\
-    \<span class="fa fa-hand-paper-o bgavid_hand_size_icon"/>\
+    \<span class="fa fa-hand-paper-o"/>\
 </div>';
 
 </script>
