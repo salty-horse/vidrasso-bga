@@ -95,9 +95,9 @@
 
 var jstpl_cardontable = '<div class="vid_cardontable" id="vid_cardontable_${player_id}" style="background-position:-${x}% -${y}%"></div>';
 var jstpl_strawman = '<div class="vid_strawcard" id="vid_straw_${player_id}_${straw_num}" style="background-position:-${x}% -${y}%"></div>';
-var jstpl_player_hand_size = '\<div class="vid_hand_size">\
-    \<span id="vid_player_hand_size_${id}">0\</span>\
-    \<span class="fa fa-hand-paper-o"/>\
+var jstpl_player_hand_size = '<div class="vid_hand_size">\
+    <span id="vid_player_hand_size_${id}">0</span>\
+    <span class="fa fa-hand-paper-o"/>\
 </div>';
 
 </script>
