@@ -9,7 +9,7 @@
 -- See http://en.boardgamearena.com/#!doc/Studio for more information.
 -------
 
-    heartsla_heartsla.tpl
+    vidrasso_vidrasso.tpl
 
     This is the HTML template of your game.
 
