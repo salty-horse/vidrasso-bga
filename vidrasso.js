@@ -178,15 +178,15 @@ function (dojo, declare) {
                     document.querySelectorAll('.vid_playertable').forEach(e => e.style.display = 'none');
                     document.getElementById('vid_rankSelector').style.display = (this.gamedatas.trumpRank == '0') ? 'inline-block' : 'none';
                     document.getElementById('vid_suitSelector').style.display = (this.gamedatas.trumpSuit == '0') ? 'inline-block' : 'none';
-                    let elem = document.getElementById('vid_trump_rank');
-                    if (elem.textContent == '?') {
-                        elem.textContent = '';
-                    }
-                    elem = document.getElementById('vid_trump_suit');
-                    if (elem.textContent == '?') {
-                        elem.textContent = '';
-                        elem.removeAttribute('title');
-                    }
+                }
+                let elem = document.getElementById('vid_trump_rank');
+                if (this.gamedatas.trumpRank == '0') {
+                    elem.textContent = this.isCurrentPlayerActive() ? '' : '?';
+                }
+                elem = document.getElementById('vid_trump_suit');
+                if (this.gamedatas.trumpSuit == '0') {
+                    elem.textContent = this.isCurrentPlayerActive() ? '' : '?';
+                    elem.removeAttribute('title');
                 }
                 break;
 
