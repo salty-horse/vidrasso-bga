@@ -700,7 +700,6 @@ class Vidrasso extends Table {
             $sql = "UPDATE player SET player_score=player_score+$points  WHERE player_id='$player_id'";
             self::DbQuery($sql);
             self::notifyAllPlayers('endHand', clienttranslate('${player_name} scores ${points} points (was gifted ${gift_value} ${suit})'), [
-                'i18n' => ['gift_suit_name'],
                 'player_id' => $player_id,
                 'player_name' => $players[$player_id]['player_name'],
                 'points' => $points,
