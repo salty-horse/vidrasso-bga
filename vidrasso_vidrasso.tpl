@@ -36,7 +36,7 @@
     <div class="vid_playertablecard" id="vid_playertablecard_{PLAYER_ID}"></div>
     <span class="vid_playertable_info">
         <span>{SCORE_PILE}: </span>
-        <span id="score_pile_{PLAYER_ID}"></span>
+        <span id="vid_score_pile_{PLAYER_ID}"></span>
     </span>
 </div>
 <!-- END player -->
@@ -96,7 +96,7 @@
 var jstpl_cardontable = '<div class="vid_cardontable" id="vid_cardontable_${player_id}" style="background-position:-${x}% -${y}%"></div>';
 var jstpl_strawman = '<div class="vid_strawcard" id="vid_straw_${player_id}_${straw_num}" style="background-position:-${x}% -${y}%"></div>';
 var jstpl_player_hand_size = '\<div class="vid_hand_size">\
-    \<span id="player_hand_size_${id}" class="player_hand_size_value">0\</span>\
+    \<span id="vid_player_hand_size_${id}">0\</span>\
     \<span class="fa fa-hand-paper-o"/>\
 </div>';
 

@@ -108,7 +108,7 @@ function (dojo, declare) {
                 // Score piles
                 let score_pile_counter = new ebg.counter();
                 this.scorePiles[player_id] = score_pile_counter;
-                score_pile_counter.create(`score_pile_${player_id}`);
+                score_pile_counter.create(`vid_score_pile_${player_id}`);
                 score_pile_counter.setValue(player_info.score_pile);
 
                 // Hand size counter
@@ -116,7 +116,7 @@ function (dojo, declare) {
                     document.getElementById(`player_board_${player_id}`));
                 let hand_size_counter = new ebg.counter();
                 this.handSizes[player_id] = hand_size_counter;
-                hand_size_counter.create(`player_hand_size_${player_id}`);
+                hand_size_counter.create(`vid_player_hand_size_${player_id}`);
                 hand_size_counter.setValue(player_info.hand_size);
 
                 // Strawmen
