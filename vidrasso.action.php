@@ -37,7 +37,7 @@ class action_vidrasso extends APP_GameAction {
         self::setAjaxMode();
         $trump_type = self::getArg('trump_type', AT_enum, true, null, ['rank', 'suit']);
         $trump_id = self::getArg('id', AT_posint, true);
-        if ($trump_type == 'rank' && $trump_id > 10 || $trump_type == 'suit' && $trump_id > 4)
+        if ($trump_type == 'rank' && $trump_id > 9 || $trump_type == 'suit' && $trump_id > 4)
             throw new BgaUserException(self::_('Invalid trump value'));
 
         $this->game->selectTrump($trump_type, $trump_id);
