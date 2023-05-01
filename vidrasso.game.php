@@ -87,6 +87,7 @@ class Vidrasso extends Table {
 
         // Init global values with their initial values
 
+        self::setGameStateInitialValue('roundNumber', 0);
         self::setGameStateInitialValue('trumpRank', 0);
         self::setGameStateInitialValue('trumpSuit', 0);
 
