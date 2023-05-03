@@ -15,7 +15,7 @@
 
 -->
 
-<div id="vid_player_{TOP_PLAYER_ID}_strawmen_wrap" class="whiteblock">
+<div id="vid_player_{TOP_PLAYER_ID}_strawmen_wrap" class="whiteblock vid_strawmen_wrap">
     <h3>Opponent's strawmen</h3>
     <div class="vid_strawmen">
         <div class="vid_straw" id="vid_playerstraw_{TOP_PLAYER_ID}_1"></div>
@@ -72,7 +72,7 @@
 
 </div>
 
-<div id="vid_player_{BOTTOM_PLAYER_ID}_strawmen_wrap" class="whiteblock">
+<div id="vid_player_{BOTTOM_PLAYER_ID}_strawmen_wrap" class="whiteblock vid_strawmen_wrap">
     <h3>{MY_STRAWMEN}</h3>
     <div id="vid_mystrawmen" class="vid_strawmen">
         <div class="vid_straw" id="vid_playerstraw_{BOTTOM_PLAYER_ID}_1"></div>
