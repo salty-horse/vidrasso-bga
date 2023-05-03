@@ -139,6 +139,10 @@
     width: auto;
 }
 
+.vid_strawmen {
+    text-align: center;
+}
+
 .vid_straw {
     display: inline-block;
     position: relative;
