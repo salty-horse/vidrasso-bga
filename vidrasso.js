@@ -329,13 +329,14 @@ function (dojo, declare) {
 
         initStrawmen: function(player_id, visible_strawmen, more_strawmen) {
             for (const [ix, straw] of visible_strawmen.entries()) {
-                if (!straw) continue;
-                this.setStrawman(player_id, ix + 1, straw.type, straw.type_arg, straw.id);
-                this.visibleCards[`${straw.type},${straw.type_arg}`] = `vid_straw_${player_id}_${ix + 1}`;
+                if (straw) {
+                    this.setStrawman(player_id, ix + 1, straw.type, straw.type_arg, straw.id);
+                    this.visibleCards[`${straw.type},${straw.type_arg}`] = `vid_straw_${player_id}_${ix + 1}`;
+                }
                 if (!more_strawmen || more_strawmen[ix]) {
                     let more = document.createElement('div');
                     more.className = 'vid_straw_more';
-                    document.getElementById(`vid_straw_${player_id}_${ix+1}`).parentNode.appendChild(more);
+                    document.getElementById(`vid_playerstraw_${player_id}_${ix+1}`).appendChild(more);
                 }
             }
         },
