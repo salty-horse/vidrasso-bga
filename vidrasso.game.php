@@ -757,7 +757,7 @@ class Vidrasso extends Table {
         }
         $scoreTable[] = $row;
 
-        $row = [clienttranslate('Received Gift Card')];
+        $row = [clienttranslate('Received gift card')];
         foreach ($players as $player_id => $player) {
             $gift_card = $gift_cards_by_player[$player_id];
             $row[] = [
@@ -770,25 +770,25 @@ class Vidrasso extends Table {
         }
         $scoreTable[] = $row;
 
-        $row = [clienttranslate('Score Pile')];
+        $row = [clienttranslate('Score pile')];
         foreach ($players as $player_id => $player) {
             $row[] = $score_piles[$player_id]['points'];
         }
         $scoreTable[] = $row;
 
-        $row = [clienttranslate('Round Score')];
+        $row = [clienttranslate('Round score')];
         foreach ($players as $player_id => $player) {
             $row[] = $score_piles[$player_id]['points'] + $gift_cards_by_player[$player_id]['type_arg'];
         }
         $scoreTable[] = $row;
 
-        $row = [clienttranslate('Trumps Played')];
+        $row = [clienttranslate('Trumps played')];
         foreach ($players as $player_id => $player) {
             $row[] = $player_stats[$player_id]['trumps_round'];
         }
         $scoreTable[] = $row;
 
-        $row = [clienttranslate('Hand Strength')];
+        $row = [clienttranslate('Hand strength')];
         foreach ($players as $player_id => $player) {
             $row[] = $player_stats[$player_id]['strength_round'];
         }
@@ -801,7 +801,7 @@ class Vidrasso extends Table {
         }
         $scoreTable[] = $row;
 
-        $row = [clienttranslate('Cumulative Score')];
+        $row = [clienttranslate('Cumulative score')];
         foreach ($players as $player_id => $player) {
             $row[] = $new_scores[$player_id];
         }
