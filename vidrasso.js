@@ -77,6 +77,8 @@ function (dojo, declare) {
             this.playerHand.centerItems = true;
             this.playerHand.create(this, $('vid_myhand'), this.cardWidth, this.cardHeight);
             this.playerHand.image_items_per_row = 9;
+            this.playerHand.onItemCreate = dojo.hitch(this, this.setupNewCard);
+            this.playerHand.jstpl_stock_item = '<div id="${id}" class="vid_card"></div>';
 
             dojo.connect(this.playerHand, 'onChangeSelection', this, 'onPlayerHandSelectionChanged');
 
@@ -89,7 +91,7 @@ function (dojo, declare) {
                 for (let rank = 1; rank <= 9; rank++) {
                     // Build card type id
                     let card_type_id = this.getCardUniqueId(suit, rank);
-                    this.playerHand.addItemType(card_type_id, card_type_id, g_gamethemeurl + 'img/cards.png', card_type_id);
+                    this.playerHand.addItemType(card_type_id, card_type_id);
                 }
             }
 
@@ -240,7 +242,7 @@ function (dojo, declare) {
                 switch(stateName) {
                 // Mark hand cards if player hasn't gifted yet
                 case 'giftCard':
-                    document.querySelectorAll('#vid_myhand .stockitem').forEach(
+                    document.querySelectorAll('#vid_myhand .vid_card').forEach(
                         e => e.classList.add('vid_playable'));
                     break;
                 }
@@ -275,6 +277,22 @@ function (dojo, declare) {
             this.ajaxcall(`/vidrasso/vidrasso/${action}.html`, args, this, func, err);
         },
 
+        populateCardElement: function(card_div, suit, rank) {
+            dojo.place('<div class="vid_card_crown">&nbsp</div>', card_div);
+            dojo.place(`<div class="vid_card_main"><div class="vid_card_rank vid_suit_color_${suit}">${rank}</div><div class="vid_card_suit vid_card_suit_${suit}">&nbsp;</div></div>`, card_div);
+
+            if (rank == this.gamedatas.trumpRank) {
+                card_div.classList.add('vid_card_trump_rank');
+            } else if (suit == this.gamedatas.trumpSuit) {
+                card_div.classList.add('vid_card_trump_suit');
+            }
+        },
+
+        setupNewCard: function(card_div, card_type_id, card_id) {
+            let [suit, rank] = this.getCardInfoById(card_type_id);
+            this.populateCardElement(card_div, suit, rank);
+        },
+
         /** Override this function to inject html for log items  */
 
         /* @Override */
@@ -305,17 +323,11 @@ function (dojo, declare) {
             return (suit - 1) * 9 + (rank - 1);
         },
 
-        getCardSpriteXY: function(suit, rank) {
-            let modifier = 0;
-            if (rank == this.gamedatas.trumpRank) {
-                modifier = 800;
-            } else if (suit == this.gamedatas.trumpSuit) {
-                modifier = 400;
-            }
-            return {
-                x: 100 * (rank - 1),
-                y: 100 * (suit - 1) + modifier,
-            }
+        getCardInfoById: function(card_id) {
+            return [
+                Math.floor(card_id / 9) + 1,
+                card_id % 9 + 1,
+            ];
         },
 
         initPlayerHand: function(card_list) {
@@ -330,43 +342,40 @@ function (dojo, declare) {
 
         initStrawmen: function(player_id, visible_strawmen, more_strawmen) {
             for (const [ix, straw] of visible_strawmen.entries()) {
-                if (straw) {
-                    this.setStrawman(player_id, ix + 1, straw.type, straw.type_arg, straw.id);
-                    this.visibleCards[`${straw.type},${straw.type_arg}`] = `vid_straw_${player_id}_${ix + 1}`;
-                }
                 if (!more_strawmen || more_strawmen[ix]) {
                     let more = document.createElement('div');
                     more.className = 'vid_straw_more';
-                    document.getElementById(`vid_playerstraw_${player_id}_${ix+1}`).appendChild(more);
+                    document.getElementById(`vid_playerstraw_${player_id}_${ix+1}`).prepend(more);
+                }
+                if (straw) {
+                    this.setStrawman(player_id, ix + 1, straw.type, straw.type_arg, straw.id);
+                    this.visibleCards[`${straw.type},${straw.type_arg}`] = `vid_straw_${player_id}_${ix + 1}`;
                 }
             }
         },
 
         setStrawman: function(player_id, straw_num, suit, rank, card_id) {
-            let spriteCoords = this.getCardSpriteXY(suit, rank);
             let elem = document.getElementById(`vid_playerstraw_${player_id}_${straw_num}`);
-            let newElem = dojo.place(this.format_block('jstpl_strawman', {
-                x: spriteCoords.x,
-                y: spriteCoords.y,
-                player_id: player_id,
-                straw_num: straw_num,
-            }), elem);
-            newElem.dataset.card_id = card_id;
-            this.strawmenById[card_id] = newElem;
+            let cardElem = dojo.create('div', {
+                id: `vid_straw_${player_id}_${straw_num}`,
+                class: 'vid_card',
+            }, elem);
+            this.populateCardElement(cardElem, suit, rank);
+            cardElem.dataset.card_id = card_id;
+            this.strawmenById[card_id] = cardElem;
             if (player_id == this.player_id) {
-                dojo.connect(newElem, 'onclick', this, 'onChoosingStrawman');
+                dojo.connect(cardElem, 'onclick', this, 'onChoosingStrawman');
             }
-            return newElem;
+            return cardElem;
         },
 
         putCardOnTable: function(player_id, suit, rank, card_id) {
             let cardInHand = false;
-            let spriteCoords = this.getCardSpriteXY(suit, rank);
-            let placedCard = dojo.place(this.format_block('jstpl_cardontable', {
-                x : spriteCoords.x,
-                y : spriteCoords.y,
-                player_id : player_id
-            }), 'vid_playertablecard_' + player_id);
+            let placedCard = dojo.create('div', {
+                id: 'vid_cardontable_' + player_id,
+                class: 'vid_card vid_cardontable',
+            }, 'vid_playertablecard_' + player_id);
+            this.populateCardElement(placedCard, suit, rank);
             placedCard.dataset.card_id = card_id;
         },
 
@@ -433,11 +442,16 @@ function (dojo, declare) {
         markTrumps: function() {
             for (let [key, div_id] of Object.entries(this.visibleCards)) {
                 let [suit, rank] = key.split(',');
-                if (rank == this.gamedatas.trumpRank || suit == this.gamedatas.trumpSuit) {
-                    let elem = document.getElementById(div_id);
-                    if (elem) {
-                        let coords = this.getCardSpriteXY(suit, rank);
-                        elem.style['background-position'] = `-${coords.x}% -${coords.y}%`;
+                let elem = document.getElementById(div_id);
+                if (rank == this.gamedatas.trumpRank) {
+                    elem.classList.add('vid_card_trump_rank');
+                    elem.classList.remove('vid_card_trump_suit');
+                } else {
+                    elem.classList.remove('vid_card_trump_rank');
+                    if (suit == this.gamedatas.trumpSuit) {
+                        elem.classList.add('vid_card_trump_suit');
+                    } else {
+                        elem.classList.remove('vid_card_trump_suit');
                     }
                 }
             }
