@@ -111,14 +111,6 @@ class Vidrasso extends Table {
         self::setGameStateInitialValue('firstPlayer', $player_id);
         self::setGameStateInitialValue('firstPicker', $player_id);
 
-        // Game statistics
-        if ($this->getGameStateValue('targetPoints') == 300) {
-            $this->initStat('table', 'number_of_rounds_standard_game', 0);
-        } else {
-            $this->initStat('table', 'number_of_rounds_long_game', 0);
-        }
-
-
         /************ End of the game initialization *****/
     }
 
@@ -823,14 +815,13 @@ class Vidrasso extends Table {
                 $this->setStat($player_stats[$player_id]['strength'], 'total_hand_strength', $player_id);
             }
 
+            $round_number = $this->getGameStateValue('roundNumber');
+            $this->setStat($round_number, $target_points == 300 ?
+                'number_of_rounds_standard_game' :
+                'number_of_rounds_long_game');
+
             $this->gamestate->nextState('endGame');
             return;
-        } else {
-            if ($target_points == 300) {
-                $this->incStat(1, 'number_of_rounds_standard_game');
-            } else {
-                $this->incStat(1, 'number_of_rounds_long_game');
-            }
         }
 
         // Alternate first player
