@@ -90,6 +90,10 @@
 
 
 <script type="text/javascript">
+const elem = document.createElement('link');
+elem.rel = 'stylesheet';
+elem.href = 'https://fonts.googleapis.com/css?family=Stint+Ultra+Condensed&text=123456789';
+document.head.appendChild(elem);
 
 // Javascript HTML templates
 

@@ -243,14 +243,6 @@
     height: 1em;
 }
 
-/* https://fonts.googleapis.com/css?family=Stint+Ultra+Condensed&text=123456789 */
-@font-face {
-  font-family: 'Stint Ultra Condensed';
-  font-style: normal;
-  font-weight: 400;
-  src: url(https://fonts.gstatic.com/l/font?kit=-W_gXIrsVjjeyEnPC45qD2NoFPtBE0xCh2A-rw0D4PBEQ_Kzn6hc&skey=a36c63c78c4b1dd1&v=v21) format('woff2');
-}
-
 .vid_card_crown {
     display: none;
     position: absolute;
