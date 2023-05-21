@@ -50,7 +50,6 @@ class view_vidrasso_vidrasso extends game_view {
         
         $this->page->begin_block($template, 'player');
         foreach ($players as $player_id => $info) {
-            $dir = ($player_id == $current_player_id) ? 'W': 'E';
             $this->page->insert_block('player', [
                 'PLAYER_ID' => $player_id,
                 'PLAYER_NAME' => $players[$player_id]['player_name'],
