@@ -78,7 +78,7 @@ class Vidrasso extends Table {
             $this->initStat('player', 'average_points_per_trick', 0, $player_id);
             $this->initStat('player', 'number_of_trumps_played', 0, $player_id);
         }
-        $sql .= implode($values, ',');
+        $sql .= implode(',', $values);
         self::DbQuery($sql);
         self::reattributeColorsBasedOnPreferences($players, ['ff0000', '008000']);
         self::reloadPlayersBasicInfos();
